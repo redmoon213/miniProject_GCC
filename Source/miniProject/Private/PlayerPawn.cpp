@@ -3,6 +3,8 @@
 
 #include "miniProject/Public/PlayerPawn.h"
 
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -52,12 +54,60 @@ void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+	if (pc != nullptr)
+	{
+		pc->bShowMouseCursor = true;
+		UEnhancedInputLocalPlayerSubsystem* subsys =
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer());
+		if (subsys != nullptr)
+		{
+			subsys->AddMappingContext(imcPlayerInput, 0);
+		}
+	}
 }
 
 // Called every frame
 void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	// Tick 당, 매 프레임 마다 호출
+	// 사용자 입력 키를 이용해서 
+	FVector dir =FVector(h,v,0);
+	dir.Normalize(); // 방향 벡터 길이가 1이 되도록 정규화(1로 제한)
+	
+	// y축(좌우) / z축(상하)를 분리하여 이동할 수 있도록 수정
+	// 한축이 막혀도, 다른 축은 계속 이동할 수 있도록 처리하기 위해 분리	
+	FVector newVector = dir * movementSpeed* DeltaTime;
+	
+	SetActorLocation(GetActorLocation() + FVector(0, newVector.Y, 0), true);
+	SetActorLocation(GetActorLocation() + FVector(newVector.X, 0, 0), true);
+	
+	
+	//마우스 위치에 따라 캐릭터의 방향이 움직이게 
+	//APlayerController* pc = GetWorld()->GetFirstPlayerController(); 이 방식으로도 가져 올 수 있긴 함
+	APlayerController* pc = Cast<APlayerController>(GetController());
+	
+	if (pc != nullptr)
+	{
+		FHitResult hitResult;
+		
+		if (pc->GetHitResultUnderCursor(ECC_Visibility, false, hitResult))
+		{
+			FVector targetLocation = hitResult.ImpactPoint;
+			FVector playerLocation = GetActorLocation();
+			
+			targetLocation.Z = playerLocation.Z;
+			
+			FRotator playerLookRotation = FRotationMatrix::MakeFromX(targetLocation - playerLocation).Rotator();
+			SetActorRotation(playerLookRotation);
+			
+		}
+		
+		
+	}
+	
 }
 
 // Called to bind functionality to input
@@ -65,6 +115,24 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	
+	UEnhancedInputComponent* eic = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	
+	if (eic != nullptr)
+	{
+		eic->BindAction(iaHorizontal, ETriggerEvent::Triggered, this, &APlayerPawn::OnInputHorizontal);
+		eic->BindAction(iaHorizontal, ETriggerEvent::Completed, this, &APlayerPawn::OnInputHorizontal);
+		
+		eic->BindAction(iaVertical, ETriggerEvent::Triggered, this, &APlayerPawn::OnInputVertical);
+		eic->BindAction(iaVertical, ETriggerEvent::Completed, this, &APlayerPawn::OnInputVertical);
+	}
 }
 
+void APlayerPawn::OnInputHorizontal(const struct FInputActionValue& value)
+{
+	h = value.Get<float>();
+}
+
+void APlayerPawn::OnInputVertical(const struct FInputActionValue& value)
+{
+	v = value.Get<float>();
+}

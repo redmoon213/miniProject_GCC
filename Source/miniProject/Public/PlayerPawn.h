@@ -24,7 +24,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	
+	//박스콜리전과 스태틱메시 컴포넌트
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* boxComp;
 	
@@ -38,5 +39,24 @@ public:
 	UPROPERTY(EditAnywhere, Category="Camera")
 	class UCameraComponent* cameraComp;
 	
-
+	//입력관련 변수들
+	UPROPERTY(EditAnywhere)
+	class UInputMappingContext* imcPlayerInput;
+	UPROPERTY(EditAnywhere)
+	class UInputAction* iaHorizontal;
+	UPROPERTY(EditAnywhere)
+	class UInputAction* iaVertical;
+	
+	UPROPERTY(EditAnywhere)
+	float movementSpeed = 500.0f;
+	
+	
+private:
+	float h;
+	float v;
+	
+	void OnInputVertical(const struct FInputActionValue& value);
+	void OnInputHorizontal(const struct FInputActionValue& value);
+	
+	
 };

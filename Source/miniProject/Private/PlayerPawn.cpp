@@ -104,9 +104,9 @@ void APlayerPawn::Tick(float DeltaTime)
 			//SetActorRotation(playerLookRotation);
 			
 			
-			FRotator CurrentRotation = GetActorRotation();
-			FRotator SmoothRotation = FMath::RInterpTo(CurrentRotation, playerLookRotation, DeltaTime, 10.0f); // 10.0f는 회전 속도
-			SetActorRotation(SmoothRotation);
+			FRotator currentRotation = GetActorRotation();
+			FRotator smoothRotation = FMath::RInterpTo(currentRotation, playerLookRotation, DeltaTime, 10.0f); // 10.0f는 회전 속도
+			SetActorRotation(smoothRotation);
 		}
 		
 	}

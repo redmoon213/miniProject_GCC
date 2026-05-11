@@ -57,7 +57,7 @@ void APlayerPawn::BeginPlay()
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	if (pc != nullptr)
 	{
-		pc->bShowMouseCursor = true;
+		pc->bShowMouseCursor = true;  // 화면에 마우스 커서가 보이도록 함
 		UEnhancedInputLocalPlayerSubsystem* subsys =
 			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer());
 		if (subsys != nullptr)
@@ -85,7 +85,7 @@ void APlayerPawn::Tick(float DeltaTime)
 	SetActorLocation(GetActorLocation() + FVector(newVector.X, 0, 0), true);
 	
 	
-	//마우스 위치에 따라 캐릭터의 방향이 움직이게 
+	//마우스 위치에 따라 캐릭터의 방향이 움직이게 함
 	//APlayerController* pc = GetWorld()->GetFirstPlayerController(); 이 방식으로도 가져 올 수 있긴 함
 	APlayerController* pc = Cast<APlayerController>(GetController());
 	
@@ -101,10 +101,13 @@ void APlayerPawn::Tick(float DeltaTime)
 			targetLocation.Z = playerLocation.Z;
 			
 			FRotator playerLookRotation = FRotationMatrix::MakeFromX(targetLocation - playerLocation).Rotator();
-			SetActorRotation(playerLookRotation);
+			//SetActorRotation(playerLookRotation);
 			
+			
+			FRotator CurrentRotation = GetActorRotation();
+			FRotator SmoothRotation = FMath::RInterpTo(CurrentRotation, playerLookRotation, DeltaTime, 10.0f); // 10.0f는 회전 속도
+			SetActorRotation(SmoothRotation);
 		}
-		
 		
 	}
 	

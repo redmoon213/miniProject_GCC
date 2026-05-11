@@ -3,7 +3,9 @@
 
 #include "miniProject/Public/PlayerPawn.h"
 
+#include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 
 // Sets default values
@@ -14,14 +16,35 @@ APlayerPawn::APlayerPawn()
 	
 	boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("My Box Component"));
 	SetRootComponent(boxComp);
+	
+	
+	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("My StaticMesh Component"));
+	meshComp->SetupAttachment(boxComp);
+
 	FVector boxSize = FVector(50, 50, 50);
 	boxComp->SetBoxExtent(boxSize);
 	
 	
-	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("My StaticMesh Component"));
-	boxComp->SetupAttachment(meshComp);
-
-
+	springArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("My Spring Arm Component"));
+	springArmComp->SetupAttachment(boxComp);
+	
+	springArmComp->TargetArmLength = 700.0f;
+	springArmComp->SetRelativeRotation(FRotator(-45.0f, 0.0f, 0.0f));
+	springArmComp->bUsePawnControlRotation = false;
+	springArmComp->bInheritPitch = false;
+	springArmComp->bInheritRoll = false;
+	springArmComp->bInheritYaw = false;
+	
+	cameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("My Camera"));
+	cameraComp->SetupAttachment(springArmComp, USpringArmComponent::SocketName);
+	
+	//부드러운 추적을 위한 설정
+	springArmComp->bEnableCameraLag = true;
+	springArmComp->CameraLagSpeed = 5.0f;  // 값이 느릴수록 부드럽고 천천히 따라옴
+	
+	
+	
+	
 }	
 
 // Called when the game starts or when spawned

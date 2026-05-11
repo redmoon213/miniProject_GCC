@@ -25,8 +25,18 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UPROPERTY(EditAnywhere)
 	class UBoxComponent* boxComp;
+	
+	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* meshComp;
+	
+	// Category -> 에디터에 찾기 쉽게 "Camera"탭이라는 이름을 붙여줌.
+	UPROPERTY(EditAnywhere, Category="Camera")
+	class USpringArmComponent* springArmComp;
+	
+	UPROPERTY(EditAnywhere, Category="Camera")
+	class UCameraComponent* cameraComp;
 	
 
 };

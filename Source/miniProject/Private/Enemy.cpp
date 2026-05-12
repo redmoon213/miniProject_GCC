@@ -3,6 +3,8 @@
 
 #include "Enemy.h"
 
+#include "EngineUtils.h"
+#include "PlayerPawn.h"
 #include "Components/BoxComponent.h"
 
 
@@ -36,6 +38,15 @@ void AEnemy::BeginPlay()
 		
 	}
 	
+	for (TActorIterator<APlayerPawn> player(GetWorld()); player; ++player)
+	{
+		if (player->GetName().Contains(TEXT("BP_PlayerPawn")))
+		{
+			dir = player->GetActorLocation() - GetActorLocation();
+			dir.Normalize();
+		}
+	}
+	
 	UpdateDiceEye();
 }
 
@@ -43,14 +54,10 @@ void AEnemy::BeginPlay()
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	/*testTimeStack += DeltaTime;
 	
-	if (testTimeStack > 2.f)
-	{
-		currentDiceEye--;
-		UpdateDiceEye();
-		testTimeStack = 0;
-	}*/
+	FVector newLocation = GetActorLocation() + dir * moveSpeed * DeltaTime;
+	SetActorLocation(newLocation);
+	
 }
 
 void AEnemy::UpdateDiceEye()

@@ -35,9 +35,11 @@ public:
 	UPROPERTY(EditAnywhere);
 	int32 currentDiceEye = 6;
 	
-	float testTimeStack = 0.f;
-	//눈금 UV 오프셋
+	float moveSpeed = 300.0f;
 	
+	FVector dir;
+	
+	//눈금 텍스쳐 UV 오프셋
 	const FVector2D diceOffset[6] = {
 		FVector2D(0.395f, 0.49f),	//1번 눈금 
 		FVector2D(0.65f, 0.023f),   // 2번 눈금

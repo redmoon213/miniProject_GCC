@@ -56,7 +56,7 @@ void AEnemy::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	FVector newLocation = GetActorLocation() + dir * moveSpeed * DeltaTime;
-	SetActorLocation(newLocation);
+	SetActorLocation(newLocation, true);
 	
 }
 
@@ -68,5 +68,19 @@ void AEnemy::UpdateDiceEye()
 		
 		dynamicMaterial->SetScalarParameterValue("UOffset", UVoffset.X);
 		dynamicMaterial->SetScalarParameterValue("VOffset", UVoffset.Y);
+	}
+}
+
+void AEnemy::TakeDamage()
+{
+	if (currentDiceEye == 1)
+	{
+		this->Destroy();
+	}
+	
+	else
+	{
+		currentDiceEye --;
+		UpdateDiceEye();
 	}
 }

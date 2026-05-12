@@ -58,8 +58,6 @@ void ABulletPlayerBasic::OnBulletOverlap(UPrimitiveComponent* OverlappedComponen
 	
 	if (enemyActor!= nullptr)
 	{
-		enemyActor->currentDiceEye--;
-		enemyActor->UpdateDiceEye();
-		
+		enemyActor->TakeDamage();
 	}
 }

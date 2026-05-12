@@ -22,4 +22,12 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemy> enemy;
+	
+	float spawnTimer = 2.0f;
+	
+private:
+	float currentTime = 0.0f;
 };

@@ -35,6 +35,8 @@ public:
 	UPROPERTY(EditAnywhere);
 	int32 currentDiceEye = 6;
 	
+	
+	
 	float moveSpeed = 300.0f;
 	
 	FVector dir;
@@ -50,7 +52,7 @@ public:
 	};
 	
 	
-	
+	void TakeDamage();
 	
 	void UpdateDiceEye();
 };

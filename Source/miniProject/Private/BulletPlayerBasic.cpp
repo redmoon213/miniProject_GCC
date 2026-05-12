@@ -17,11 +17,15 @@ ABulletPlayerBasic::ABulletPlayerBasic()
 	SetRootComponent(boxComp);
 	FVector boxSize = FVector(10.f, 10.f, 10.f);
 	boxComp->SetBoxExtent(boxSize);
-	boxComp->SetWorldScale3D(FVector(0.25f, 0.25f, 0.25f));
+	FVector scaleVector = FVector (0.8f, 0.8f,0.8f);
+	
+	boxComp->SetWorldScale3D(scaleVector);
+	
 	
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("My StaticMesh Component"));
 	meshComp->SetupAttachment(boxComp);
 	
+	meshComp->SetWorldScale3D(scaleVector);
 	//박스와 메시가 카메라에 충돌되지 않도록 설정 아래 프로필에서 다 설정됨.
 	//boxComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	//meshComp->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);

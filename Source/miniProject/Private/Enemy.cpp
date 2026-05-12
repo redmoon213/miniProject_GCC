@@ -20,6 +20,8 @@ AEnemy::AEnemy()
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("My Mesh Component"));
 	meshComp->SetupAttachment(boxComp);
 	
+	boxComp->SetCollisionProfileName(TEXT("Enemy"));
+	
 }
 
 // Called when the game starts or when spawned
@@ -34,20 +36,21 @@ void AEnemy::BeginPlay()
 		
 	}
 	
+	UpdateDiceEye();
 }
 
 // Called every frame
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	testTimeStack += DeltaTime;
+	/*testTimeStack += DeltaTime;
 	
 	if (testTimeStack > 2.f)
 	{
 		currentDiceEye--;
 		UpdateDiceEye();
 		testTimeStack = 0;
-	}
+	}*/
 }
 
 void AEnemy::UpdateDiceEye()

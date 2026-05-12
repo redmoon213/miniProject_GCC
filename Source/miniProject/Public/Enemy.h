@@ -33,18 +33,18 @@ public:
 	class UMaterialInstanceDynamic* dynamicMaterial;
 	
 	UPROPERTY(EditAnywhere);
-	int32 currentDiceEye = 5;
+	int32 currentDiceEye = 6;
 	
 	float testTimeStack = 0.f;
 	//눈금 UV 오프셋
 	
 	const FVector2D diceOffset[6] = {
-		FVector2D(0.4f, 0.523f),	//1번 눈금 
+		FVector2D(0.395f, 0.49f),	//1번 눈금 
 		FVector2D(0.65f, 0.023f),   // 2번 눈금
-		FVector2D(0.4f, 0.273f),    // 3번 눈금
+		FVector2D(0.4f, 0.256f),    // 3번 눈금
 		FVector2D(0.388f, 0.756f),	// 4번 눈금
-		FVector2D(0.15, 0.023f),	// 5번 눈금, 좌상단
-		FVector2D(0.4f, 0.023f)		// 6번 눈금
+		FVector2D(0.15, 0.02f),	// 5번 눈금, 좌상단
+		FVector2D(0.403f, 0.008f)		// 6번 눈금
 	};
 	
 	

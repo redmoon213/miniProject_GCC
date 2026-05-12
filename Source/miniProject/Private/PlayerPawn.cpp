@@ -3,10 +3,12 @@
 
 #include "miniProject/Public/PlayerPawn.h"
 
+#include "BulletPlayerBasic.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "PlayerCursor.h"
 #include "Camera/CameraComponent.h"
+#include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
@@ -45,8 +47,10 @@ APlayerPawn::APlayerPawn()
 	springArmComp->bEnableCameraLag = true;
 	springArmComp->CameraLagSpeed = 5.0f;  // 값이 느릴수록 부드럽고 천천히 따라옴
 	
+	firePosition = CreateDefaultSubobject<UArrowComponent>(TEXT("My Fire Position Component"));
+	firePosition->SetupAttachment(boxComp);
 	
-	
+	boxComp->SetCollisionProfileName(TEXT("Player"));
 	
 }	
 
@@ -54,7 +58,7 @@ APlayerPawn::APlayerPawn()
 void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	// 위젯 생성코드는 무조건 BeginPlay안에 넣어야함 생성자에 넣으면 크래시 난다고함
 	playerCursorInstance = CreateWidget<UPlayerCursor>(GetWorld(), playerCursorClass);
 	
 	
@@ -134,6 +138,8 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		
 		eic->BindAction(iaVertical, ETriggerEvent::Triggered, this, &APlayerPawn::OnInputVertical);
 		eic->BindAction(iaVertical, ETriggerEvent::Completed, this, &APlayerPawn::OnInputVertical);
+		
+		eic->BindAction(iaFire, ETriggerEvent::Triggered, this, &APlayerPawn::Fire);
 	}
 }
 
@@ -145,4 +151,12 @@ void APlayerPawn::OnInputHorizontal(const struct FInputActionValue& value)
 void APlayerPawn::OnInputVertical(const struct FInputActionValue& value)
 {
 	v = value.Get<float>();
+}
+
+void APlayerPawn::Fire(const struct FInputActionValue& value)
+{
+	
+	ABulletPlayerBasic* bulletPlayer = GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactory,
+		firePosition->GetComponentLocation(), firePosition->GetComponentRotation());
+	
 }

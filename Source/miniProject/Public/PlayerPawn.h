@@ -46,6 +46,9 @@ public:
 	class UInputAction* iaHorizontal;
 	UPROPERTY(EditAnywhere)
 	class UInputAction* iaVertical;
+	UPROPERTY(EditAnywhere)
+	class UInputAction* iaFire;
+	
 	
 	UPROPERTY(EditAnywhere)
 	float movementSpeed = 500.0f;
@@ -57,6 +60,13 @@ public:
 	//총구 컴포넌트 
 	UPROPERTY(EditAnywhere)
 	class UArrowComponent* firePosition;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABulletPlayerBasic> bulletFactory;
+	
+	//발사효과음
+	UPROPERTY(EditAnywhere)
+	class USoundBase* fireSound;
 	
 	
 	
@@ -70,5 +80,5 @@ private:
 	void OnInputVertical(const struct FInputActionValue& value);
 	void OnInputHorizontal(const struct FInputActionValue& value);
 	
-	
+	void Fire(const struct FInputActionValue& value);
 };

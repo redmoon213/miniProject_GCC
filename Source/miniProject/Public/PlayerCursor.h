@@ -14,8 +14,7 @@ class MINIPROJECT_API UPlayerCursor : public UUserWidget
 {
 	GENERATED_BODY()
 	
-	
-	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	class UImage* cursorImage;
+	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	class UImage* playerCursorImage;
 	
 };

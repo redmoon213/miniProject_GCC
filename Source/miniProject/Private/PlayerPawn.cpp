@@ -5,6 +5,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "PlayerCursor.h"
 #include "Camera/CameraComponent.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -54,10 +55,16 @@ void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	playerCursorInstance = CreateWidget<UPlayerCursor>(GetWorld(), playerCursorClass);
+	
+	
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	if (pc != nullptr)
 	{
 		pc->bShowMouseCursor = true;  // 화면에 마우스 커서가 보이도록 함
+		pc->SetMouseCursorWidget(EMouseCursor::Default, playerCursorInstance);
+		
+		
 		UEnhancedInputLocalPlayerSubsystem* subsys =
 			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer());
 		if (subsys != nullptr)

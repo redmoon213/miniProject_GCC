@@ -50,10 +50,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	float movementSpeed = 500.0f;
 	
+	// 플레이어 커서 위젯을 담을 변수
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UPlayerCursor> playerCursorClass;
 	
 private:
 	float h;
 	float v;
+	
+	class UPlayerCursor* playerCursorInstance;
 	
 	void OnInputVertical(const struct FInputActionValue& value);
 	void OnInputHorizontal(const struct FInputActionValue& value);

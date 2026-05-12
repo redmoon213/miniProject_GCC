@@ -59,5 +59,8 @@ void ABulletPlayerBasic::OnBulletOverlap(UPrimitiveComponent* OverlappedComponen
 	if (enemyActor!= nullptr)
 	{
 		enemyActor->TakeDamage();
+		FVector bulletDirection = GetActorForwardVector();
+		enemyActor->Knockback(bulletDirection);
+		this->Destroy();
 	}
 }

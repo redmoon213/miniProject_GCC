@@ -35,7 +35,8 @@ public:
 	UPROPERTY(EditAnywhere);
 	int32 currentDiceEye = 6;
 	
-	
+	FTimerHandle hitFlashTimer;
+	FVector knockbackSpeed;
 	
 	float moveSpeed = 300.0f;
 	
@@ -53,6 +54,8 @@ public:
 	
 	
 	void TakeDamage();
+	void ResetHitFlash();
+	void Knockback(FVector bulletDirection);
 	
 	void UpdateDiceEye();
 };

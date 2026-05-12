@@ -56,6 +56,15 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	if (!knockbackSpeed.IsNearlyZero())
+	{
+		AddActorWorldOffset(knockbackSpeed * DeltaTime, true);
+		
+		knockbackSpeed = FMath::VInterpTo(knockbackSpeed, FVector::ZeroVector, DeltaTime, 5.0f);
+	}
+	
+	
+	
 	FVector newLocation = GetActorLocation() + dir * moveSpeed * DeltaTime;
 	SetActorLocation(newLocation, true);
 	
@@ -81,7 +90,28 @@ void AEnemy::TakeDamage()
 	
 	else
 	{
+		dynamicMaterial->SetScalarParameterValue("HitFlash", 1.0f);
 		currentDiceEye --;
 		UpdateDiceEye();
 	}
+	
+	GetWorld()->GetTimerManager().SetTimer(hitFlashTimer, this, &AEnemy::ResetHitFlash, 0.1f, false);
+	
+	
 }
+
+void AEnemy::ResetHitFlash()
+{
+	if (dynamicMaterial!=nullptr)
+	{
+		dynamicMaterial->SetScalarParameterValue("HitFlash", 0.0f);
+	}
+}
+
+void AEnemy::Knockback(FVector bulletDirection)
+{
+	knockbackSpeed = bulletDirection * 500.0f;
+}
+
+
+

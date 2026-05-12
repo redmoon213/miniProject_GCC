@@ -54,6 +54,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UPlayerCursor> playerCursorClass;
 	
+	//총구 컴포넌트 
+	UPROPERTY(EditAnywhere)
+	class UArrowComponent* firePosition;
+	
+	
+	
+	
 private:
 	float h;
 	float v;

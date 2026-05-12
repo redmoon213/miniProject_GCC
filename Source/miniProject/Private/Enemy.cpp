@@ -54,9 +54,9 @@ void AEnemy::UpdateDiceEye()
 {
 	if (dynamicMaterial!= nullptr && currentDiceEye >=1)
 	{
-		FVector2D UVindex = diceOffset[currentDiceEye-1];
+		FVector2D UVoffset = diceOffset[currentDiceEye-1];
 		
-		dynamicMaterial->SetScalarParameterValue("UOffset", UVindex.X);
-		dynamicMaterial->SetScalarParameterValue("VOffset", UVindex.Y);
+		dynamicMaterial->SetScalarParameterValue("UOffset", UVoffset.X);
+		dynamicMaterial->SetScalarParameterValue("VOffset", UVoffset.Y);
 	}
 }

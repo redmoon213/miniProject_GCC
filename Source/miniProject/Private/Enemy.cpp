@@ -31,6 +31,7 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	
 	UMaterialInterface* baseMaterial = meshComp->GetMaterial(0);
 	if (baseMaterial!=nullptr)
 	{
@@ -46,7 +47,7 @@ void AEnemy::BeginPlay()
 			dir.Normalize();
 		}
 	}
-	
+	currentDiceEye = FMath::RandRange(1, 6);
 	UpdateDiceEye();
 }
 

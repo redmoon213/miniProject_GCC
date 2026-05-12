@@ -20,7 +20,6 @@ AEnemy::AEnemy()
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("My Mesh Component"));
 	meshComp->SetupAttachment(boxComp);
 	
-		
 }
 
 // Called when the game starts or when spawned
@@ -41,6 +40,14 @@ void AEnemy::BeginPlay()
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	testTimeStack += DeltaTime;
+	
+	if (testTimeStack > 2.f)
+	{
+		currentDiceEye--;
+		UpdateDiceEye();
+		testTimeStack = 0;
+	}
 }
 
 void AEnemy::UpdateDiceEye()
@@ -49,7 +56,7 @@ void AEnemy::UpdateDiceEye()
 	{
 		FVector2D UVindex = diceOffset[currentDiceEye-1];
 		
-		dynamicMaterial->SetScalarParameterValue("uIndex", UVindex.X);
-		dynamicMaterial->SetScalarParameterValue("vIndex", UVindex.Y);
+		dynamicMaterial->SetScalarParameterValue("UOffset", UVindex.X);
+		dynamicMaterial->SetScalarParameterValue("VOffset", UVindex.Y);
 	}
 }

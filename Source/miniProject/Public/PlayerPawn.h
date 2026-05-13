@@ -48,7 +48,8 @@ public:
 	class UInputAction* iaVertical;
 	UPROPERTY(EditAnywhere)
 	class UInputAction* iaFire;
-	
+	UPROPERTY(EditAnywhere)	
+	class UInputAction* iaDash;
 	
 	UPROPERTY(EditAnywhere)
 	float movementSpeed = 500.0f;
@@ -68,7 +69,23 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USoundBase* fireSound;
 	
+	//대쉬기능에 관련된 변수들
+	UPROPERTY(EditAnywhere)
+	class UTimelineComponent* dashTimelineComp;
+	UPROPERTY(EditAnywhere)
+	class UCurveFloat* dashCurve;
 	
+	
+	FVector dashDirection;
+	bool isDashing;
+	float dashCurrentCoolTime = 0.0f;
+	float dashMaxCoolTime = 2.0f;
+	
+	
+	UFUNCTION()
+	void DashProgress(float Value);
+	UFUNCTION()
+	void DashFinished();
 	
 	
 private:
@@ -81,4 +98,6 @@ private:
 	void OnInputHorizontal(const struct FInputActionValue& value);
 	
 	void Fire(const struct FInputActionValue& value);
+	
+	void Dash(const struct FInputActionValue& value);
 };

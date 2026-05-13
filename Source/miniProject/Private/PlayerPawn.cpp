@@ -10,6 +10,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/TimelineComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 
@@ -50,7 +51,12 @@ APlayerPawn::APlayerPawn()
 	firePosition = CreateDefaultSubobject<UArrowComponent>(TEXT("My Fire Position Component"));
 	firePosition->SetupAttachment(boxComp);
 	
+	//충돌채널 프로필 설정
 	boxComp->SetCollisionProfileName(TEXT("Player"));
+	
+	//대시 기능에 관련된 변수 초기화
+	dashTimelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("My DashTimeline Component"));
+	
 	
 }	
 
@@ -75,6 +81,18 @@ void APlayerPawn::BeginPlay()
 		{
 			subsys->AddMappingContext(imcPlayerInput, 0);
 		}
+	}
+	
+	//대시 기능에 관련된 기능
+	if (dashCurve!=nullptr)
+	{
+		FOnTimelineFloat progressUpdate;
+		progressUpdate.BindUFunction(this, FName("DashProgress"));
+		dashTimelineComp->AddInterpFloat(dashCurve, progressUpdate);
+		
+		FOnTimelineEvent finishedEvent;
+		finishedEvent.BindUFunction(this, FName("DashFinished"));
+		dashTimelineComp->SetTimelineFinishedFunc(finishedEvent);
 	}
 }
 
@@ -140,6 +158,7 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		eic->BindAction(iaVertical, ETriggerEvent::Completed, this, &APlayerPawn::OnInputVertical);
 		
 		eic->BindAction(iaFire, ETriggerEvent::Triggered, this, &APlayerPawn::Fire);
+		eic->BindAction(iaDash, ETriggerEvent::Triggered, this, &APlayerPawn::Dash);
 	}
 }
 
@@ -159,4 +178,52 @@ void APlayerPawn::Fire(const struct FInputActionValue& value)
 	ABulletPlayerBasic* bulletPlayer = GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactory,
 		firePosition->GetComponentLocation(), firePosition->GetComponentRotation());
 	
+}
+
+void APlayerPawn::Dash(const struct FInputActionValue& value)
+{
+	
+	if (isDashing || dashCurve == nullptr)
+	{
+		return;
+	}
+	
+	isDashing = true;
+	
+	FVector inputDirection = GetLastMovementInputVector().GetSafeNormal();
+	
+	FVector currentVelocity = GetVelocity();
+	
+	if (!inputDirection.IsNearlyZero())
+	{
+		dashDirection = inputDirection;
+	}
+	
+	else
+	{
+		dashDirection = GetActorForwardVector();
+	}
+	
+	dashDirection.Z = 0.0f;
+	
+	dashTimelineComp->PlayFromStart();
+	
+}
+
+void APlayerPawn::DashProgress(float Value)
+{
+	float dashBaseSpeed = 1000.0f;
+	float deltaTime = GetWorld()->GetDeltaSeconds();
+	
+	FVector deltaLocation = dashDirection * dashBaseSpeed * Value  * deltaTime;
+	
+	AddActorWorldOffset(deltaLocation, true);
+	
+}
+
+
+void APlayerPawn::DashFinished()
+{
+	
+	isDashing = false;
 }

@@ -31,8 +31,8 @@ AEnemy::AEnemy()
 	attackDecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("Attack Decal Component"));
 	attackDecalComp->SetupAttachment(boxComp);
 	
-	attackDecalComp->SetRelativeLocation(FVector(-90.0f, 0.0f, 0.0f));
-	attackDecalComp->DecalSize = FVector(100.f, 100.f, 500.f);
+	attackDecalComp->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
+	attackDecalComp->DecalSize = FVector(100.f, 100.f, 200.f);
 
 	
 }

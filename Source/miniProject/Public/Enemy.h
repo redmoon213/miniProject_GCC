@@ -68,6 +68,17 @@ public:
 	void ChargingExcute();
 	///////////////////////////////////////
 	
+	
+	// 일반 투사체공격 구현을 위한 변수 및 함수 //
+	
+	
+	
+	
+	
+	////////////////////////////////////////////////////////////////
+	
+	
+	
 	void diceTakeDamage();
 	void ResetHitFlash();
 	void Knockback(FVector bulletDirection);

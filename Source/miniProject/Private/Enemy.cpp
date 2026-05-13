@@ -6,6 +6,7 @@
 #include "EngineUtils.h"
 #include "PlayerPawn.h"
 #include "Components/BoxComponent.h"
+#include "Components/DecalComponent.h"
 
 
 // Sets default values
@@ -24,6 +25,16 @@ AEnemy::AEnemy()
 	
 	boxComp->SetCollisionProfileName(TEXT("Enemy"));
 	
+	
+	
+	// 데칼 컴포넌트 설정
+	attackDecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("Attack Decal Component"));
+	attackDecalComp->SetupAttachment(boxComp);
+	
+	attackDecalComp->SetRelativeLocation(FVector(-90.0f, 0.0f, 0.0f));
+	attackDecalComp->DecalSize = FVector(100.f, 100.f, 500.f);
+
+	
 }
 
 // Called when the game starts or when spawned
@@ -31,14 +42,18 @@ void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	
+	// 주사위 눈금을 결정하고 업데이트
 	UMaterialInterface* baseMaterial = meshComp->GetMaterial(0);
 	if (baseMaterial!=nullptr)
 	{
 		dynamicMaterial = meshComp->CreateDynamicMaterialInstance(0, baseMaterial);
 		
 	}
+	currentDiceEye = FMath::RandRange(1, 6);
+	UpdateDiceEye();
 	
+	
+	//생성시 플레이어 방향으로 이동하게 하는 코드
 	for (TActorIterator<APlayerPawn> player(GetWorld()); player; ++player)
 	{
 		if (player->GetName().Contains(TEXT("BP_PlayerPawn")))
@@ -47,8 +62,17 @@ void AEnemy::BeginPlay()
 			dir.Normalize();
 		}
 	}
-	currentDiceEye = FMath::RandRange(1, 6);
-	UpdateDiceEye();
+	
+	// 공격 데칼 설정
+	if (attackDecalComp->GetDecalMaterial() != nullptr)
+	{
+		dynamicAttackMaterial = attackDecalComp->CreateDynamicMaterialInstance();
+	}
+	
+	attackDecalComp->SetHiddenInGame(true);
+	isCharging = false;
+	maxChargeTime = 2.0f;
+	
 }
 
 // Called every frame
@@ -56,6 +80,7 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	// 넉백 구현 코드
 	if (!knockbackSpeed.IsNearlyZero())
 	{
 		AddActorWorldOffset(knockbackSpeed * DeltaTime, true);
@@ -63,10 +88,28 @@ void AEnemy::Tick(float DeltaTime)
 		knockbackSpeed = FMath::VInterpTo(knockbackSpeed, FVector::ZeroVector, DeltaTime, 5.0f);
 	}
 	
-	
-	
+	// 이동 구현 코드
 	FVector newLocation = GetActorLocation() + dir * moveSpeed * DeltaTime;
 	SetActorLocation(newLocation, true);
+	
+	
+	// 차지공격 구현 코드
+	if (isCharging && dynamicAttackMaterial)
+	{
+		currentChargeTime += DeltaTime;
+		float chargePercent = FMath::Clamp(currentChargeTime/maxChargeTime, 0.f, 1.f);
+		
+		dynamicAttackMaterial->SetScalarParameterValue(TEXT("Percent"), chargePercent);
+		
+		if (chargePercent >= 1.0f)
+		{
+			isCharging = false;
+			attackDecalComp->SetHiddenInGame(true);
+			
+			ChargingExcute();
+		}
+	}
+	
 	
 }
 
@@ -97,6 +140,7 @@ void AEnemy::TakeDamage()
 	
 	GetWorld()->GetTimerManager().SetTimer(hitFlashTimer, this, &AEnemy::ResetHitFlash, 0.1f, false);
 	
+	Charging();
 	
 }
 
@@ -114,4 +158,15 @@ void AEnemy::Knockback(FVector bulletDirection)
 }
 
 
+void AEnemy::Charging()
+{
+	currentChargeTime = 0.0f;
+	isCharging = true;
+	attackDecalComp->SetHiddenInGame(false);
+}
 
+void AEnemy::ChargingExcute()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Excute charge"));
+	
+}

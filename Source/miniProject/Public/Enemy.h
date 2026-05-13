@@ -32,7 +32,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UMaterialInstanceDynamic* dynamicMaterial;
 	
-	UPROPERTY(EditAnywhere);
+	UPROPERTY(EditAnywhere)
 	int32 currentDiceEye = 6;
 	
 	FTimerHandle hitFlashTimer;
@@ -52,6 +52,21 @@ public:
 		FVector2D(0.403f, 0.008f)		// 6번 눈금
 	};
 	
+	// 차지공격 구현을 위한 변수및 함수 //
+	UPROPERTY(EditAnywhere, Category="AttackDecal");
+	class UDecalComponent* attackDecalComp;
+	
+	UPROPERTY(EditAnywhere)
+	class UMaterialInstanceDynamic* dynamicAttackMaterial;
+	
+	bool isCharging = false;
+	float currentChargeTime;
+	float maxChargeTime;
+	
+	
+	void Charging();
+	void ChargingExcute();
+	///////////////////////////////////////
 	
 	void TakeDamage();
 	void ResetHitFlash();

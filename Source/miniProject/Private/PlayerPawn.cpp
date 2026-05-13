@@ -11,6 +11,7 @@
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/TimelineComponent.h"
+#include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
 
 
@@ -53,6 +54,9 @@ APlayerPawn::APlayerPawn()
 	
 	//충돌채널 프로필 설정
 	boxComp->SetCollisionProfileName(TEXT("Player"));
+	
+	moveComp = CreateDefaultSubobject<UFloatingPawnMovement>(TEXT("Pawn Movement Component"));
+	moveComp->MaxSpeed = movementSpeed;
 	
 	//대시 기능에 관련된 변수 초기화
 	dashTimelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("My DashTimeline Component"));
@@ -164,12 +168,35 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void APlayerPawn::OnInputHorizontal(const struct FInputActionValue& value)
 {
-	h = value.Get<float>();
+	//h = value.Get<float>();
+	float hValue = value.Get<float>();
+	
+	if (hValue != 0 && Controller != nullptr)
+	{
+		const FRotator rotation = Controller->GetControlRotation();
+		const FRotator yawRotation(0, rotation.Yaw, 0);
+			
+		const FVector direction = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
+		
+		AddMovementInput(direction, hValue);
+	}
 }
 
 void APlayerPawn::OnInputVertical(const struct FInputActionValue& value)
 {
-	v = value.Get<float>();
+	//v = value.Get<float>();
+	
+	float vValue = value.Get<float>();
+	
+	if (vValue != 0 && Controller != nullptr)
+	{
+		const FRotator rotation = Controller->GetControlRotation();
+		const FRotator yawRotation(0, rotation.Yaw, 0);
+		
+		const FVector direction = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);
+		
+		AddMovementInput(direction, vValue);
+	}
 }
 
 void APlayerPawn::Fire(const struct FInputActionValue& value)

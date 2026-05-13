@@ -39,6 +39,11 @@ public:
 	UPROPERTY(EditAnywhere, Category="Camera")
 	class UCameraComponent* cameraComp;
 	
+	//이동 컴포넌트
+	UPROPERTY(EditAnywhere)
+	class UFloatingPawnMovement* moveComp;
+	
+	
 	//입력관련 변수들
 	UPROPERTY(EditAnywhere)
 	class UInputMappingContext* imcPlayerInput;

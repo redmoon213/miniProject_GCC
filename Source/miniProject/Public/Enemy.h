@@ -82,6 +82,7 @@ public:
 	////////////////////////////////////////////////////////////////
 	
 	
+	int32 attackMode;
 	
 	void diceTakeDamage();
 	void ResetHitFlash();

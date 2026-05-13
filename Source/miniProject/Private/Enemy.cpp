@@ -81,6 +81,15 @@ void AEnemy::BeginPlay()
 	attackDecalComp->SetHiddenInGame(true);
 	isCharging = false;
 	maxChargeTime = 3.0f;
+	////////
+	
+	//생성된 주사위가 어떤 행동을 할지 결정?
+	attackMode = FMath::RandRange(1,3);
+	
+	if (attackMode <1 || attackMode>3 )
+	{
+		attackMode = 1;
+	}
 	
 }
 
@@ -92,7 +101,7 @@ void AEnemy::Tick(float DeltaTime)
 	// 넉백 구현 코드
 	if (!knockbackSpeed.IsNearlyZero())
 	{
-		AddActorWorldOffset(knockbackSpeed * DeltaTime, true);
+		AddActorWorldOffset(knockbackSpeed * DeltaTime, false);
 		
 		knockbackSpeed = FMath::VInterpTo(knockbackSpeed, FVector::ZeroVector, DeltaTime, 5.0f);
 	}
@@ -100,6 +109,14 @@ void AEnemy::Tick(float DeltaTime)
 	// 이동 구현 코드
 	//FVector newLocation = GetActorLocation() + dir * moveSpeed * DeltaTime;
 	//SetActorLocation(newLocation, true);
+	
+	//근접공격 if attackMode = 1
+	
+	
+	//투사체 공격 if attackMode = 2
+	
+	
+	//차지 공격 if attackMode = 3
 	
 	
 	// 차지공격 구현 코드

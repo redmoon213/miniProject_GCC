@@ -68,7 +68,7 @@ public:
 	void ChargingExcute();
 	///////////////////////////////////////
 	
-	void TakeDamage();
+	void diceTakeDamage();
 	void ResetHitFlash();
 	void Knockback(FVector bulletDirection);
 	

@@ -71,7 +71,7 @@ void AEnemy::BeginPlay()
 	
 	attackDecalComp->SetHiddenInGame(true);
 	isCharging = false;
-	maxChargeTime = 2.0f;
+	maxChargeTime = 3.0f;
 	
 }
 
@@ -89,8 +89,8 @@ void AEnemy::Tick(float DeltaTime)
 	}
 	
 	// 이동 구현 코드
-	FVector newLocation = GetActorLocation() + dir * moveSpeed * DeltaTime;
-	SetActorLocation(newLocation, true);
+	//FVector newLocation = GetActorLocation() + dir * moveSpeed * DeltaTime;
+	//SetActorLocation(newLocation, true);
 	
 	
 	// 차지공격 구현 코드
@@ -124,7 +124,7 @@ void AEnemy::UpdateDiceEye()
 	}
 }
 
-void AEnemy::TakeDamage()
+void AEnemy::diceTakeDamage()
 {
 	if (currentDiceEye == 1)
 	{

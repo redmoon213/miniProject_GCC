@@ -70,9 +70,13 @@ public:
 	
 	
 	// 일반 투사체공격 구현을 위한 변수 및 함수 //
+	UPROPERTY(EditAnywhere)
+	class UArrowComponent* firePosition;
 	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABulletEnemyBasic> bulletFactory;
 	
-	
+	void FireProjectile();
 	
 	
 	////////////////////////////////////////////////////////////////
@@ -82,6 +86,8 @@ public:
 	void diceTakeDamage();
 	void ResetHitFlash();
 	void Knockback(FVector bulletDirection);
+	
+	
 	
 	void UpdateDiceEye();
 };

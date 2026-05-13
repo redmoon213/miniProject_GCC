@@ -3,8 +3,10 @@
 
 #include "Enemy.h"
 
+#include "BulletEnemyBasic.h"
 #include "EngineUtils.h"
 #include "PlayerPawn.h"
+#include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
 
@@ -15,15 +17,16 @@ AEnemy::AEnemy()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
+	//박스 컴포넌트 설정
 	boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("My Box Component"));
 	SetRootComponent(boxComp);
 	FVector boxSize = FVector(50.f, 50.f, 50.f);
 	boxComp->SetBoxExtent(boxSize);
+	boxComp->SetCollisionProfileName(TEXT("Enemy"));
 	
+	//메쉬 컴포넌트 설정
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("My Mesh Component"));
 	meshComp->SetupAttachment(boxComp);
-	
-	boxComp->SetCollisionProfileName(TEXT("Enemy"));
 	
 	
 	
@@ -33,6 +36,12 @@ AEnemy::AEnemy()
 	
 	attackDecalComp->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
 	attackDecalComp->DecalSize = FVector(100.f, 100.f, 200.f);
+	
+	// 투사체 총구 컴포넌트 설정
+	firePosition = CreateDefaultSubobject<UArrowComponent>(TEXT("Fire Position Component"));
+	firePosition->SetupAttachment(boxComp);
+	firePosition->SetRelativeLocation(FVector(25.f, 0.f, 0.f));
+	
 
 	
 }
@@ -109,8 +118,6 @@ void AEnemy::Tick(float DeltaTime)
 			ChargingExcute();
 		}
 	}
-	
-	
 }
 
 void AEnemy::UpdateDiceEye()
@@ -168,5 +175,14 @@ void AEnemy::Charging()
 void AEnemy::ChargingExcute()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Excute charge"));
+	
+}
+
+void AEnemy::FireProjectile()
+{
+	ABulletEnemyBasic* enemyBullet = GetWorld()->SpawnActor<ABulletEnemyBasic>(bulletFactory,
+		firePosition->GetComponentLocation(), firePosition->GetComponentRotation()
+		);
+	
 	
 }

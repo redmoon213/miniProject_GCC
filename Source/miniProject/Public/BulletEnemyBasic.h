@@ -22,4 +22,11 @@ protected:
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* boxComp;
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* meshComp;
+	
+	float moveSpeed = 500.0f;
 };

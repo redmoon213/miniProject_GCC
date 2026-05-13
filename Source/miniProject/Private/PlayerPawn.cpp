@@ -107,15 +107,15 @@ void APlayerPawn::Tick(float DeltaTime)
 	
 	// Tick 당, 매 프레임 마다 호출
 	// 사용자 입력 키를 이용해서 
-	FVector dir =FVector(h,v,0);
-	dir.Normalize(); // 방향 벡터 길이가 1이 되도록 정규화(1로 제한)
+	//FVector dir =FVector(h,v,0);
+	//dir.Normalize(); // 방향 벡터 길이가 1이 되도록 정규화(1로 제한)
 	
 	// y축(좌우) / z축(상하)를 분리하여 이동할 수 있도록 수정
 	// 한축이 막혀도, 다른 축은 계속 이동할 수 있도록 처리하기 위해 분리	
-	FVector newVector = dir * movementSpeed* DeltaTime;
+	//FVector newVector = dir * movementSpeed* DeltaTime;
 	
-	SetActorLocation(GetActorLocation() + FVector(0, newVector.Y, 0), true);
-	SetActorLocation(GetActorLocation() + FVector(newVector.X, 0, 0), true);
+	//SetActorLocation(GetActorLocation() + FVector(0, newVector.Y, 0), true);
+	//SetActorLocation(GetActorLocation() + FVector(newVector.X, 0, 0), true);
 	
 	
 	//마우스 위치에 따라 캐릭터의 방향이 움직이게 함
@@ -173,7 +173,7 @@ void APlayerPawn::OnInputHorizontal(const struct FInputActionValue& value)
 	
 	if (hValue != 0 && Controller != nullptr)
 	{
-		const FRotator rotation = Controller->GetControlRotation();
+		const FRotator rotation = cameraComp->GetComponentRotation();
 		const FRotator yawRotation(0, rotation.Yaw, 0);
 			
 		const FVector direction = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::X);
@@ -190,7 +190,7 @@ void APlayerPawn::OnInputVertical(const struct FInputActionValue& value)
 	
 	if (vValue != 0 && Controller != nullptr)
 	{
-		const FRotator rotation = Controller->GetControlRotation();
+		const FRotator rotation = cameraComp->GetComponentRotation();
 		const FRotator yawRotation(0, rotation.Yaw, 0);
 		
 		const FVector direction = FRotationMatrix(yawRotation).GetUnitAxis(EAxis::Y);

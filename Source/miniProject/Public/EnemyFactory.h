@@ -26,8 +26,26 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AEnemy> enemy;
 	
+	
+	float minSpawnDistance = 300.0f;
+	float maxSpawnDistance = 1500.0f;
+	int32 enemiesSpawnLeft;
+	
+	FTimerHandle enemiesSpawnTimerHandle;
+	
+	
+	
+	bool GetValidSpawnLocation(FVector& outLocation);
+	
+	void SpawnStart(int32 enemyCount);
+	
+	void SpawnSingleEnemy();
+	
+	
+	
 	float spawnTimer = 2.0f;
 	
 private:
+	
 	float currentTime = 0.0f;
 };

@@ -94,8 +94,8 @@ public:
 	
 	
 private:
-	float h;
-	float v;
+	//float h;
+	//float v;
 	
 	class UPlayerCursor* playerCursorInstance;
 	

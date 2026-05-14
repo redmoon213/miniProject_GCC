@@ -55,6 +55,9 @@ public:
 	class UInputAction* iaFire;
 	UPROPERTY(EditAnywhere)	
 	class UInputAction* iaDash;
+	UPROPERTY(EditAnywhere)
+	class UInputAction* iaChangeWeapon;
+	
 	
 	UPROPERTY(EditAnywhere)
 	float movementSpeed = 1000.0f;
@@ -70,7 +73,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ABulletPlayerBasic> bulletFactory;
 	
-	//발사효과음
+	//발사 관련 변수
+	
+	int32 fireMode = 1;
+	FTimerHandle autoFireTimerHandle;
+	float autoFireRate = 0.3f;
+	
 	UPROPERTY(EditAnywhere)
 	class USoundBase* fireSound;
 	
@@ -99,10 +107,16 @@ private:
 	
 	class UPlayerCursor* playerCursorInstance;
 	
+	
 	void OnInputVertical(const struct FInputActionValue& value);
 	void OnInputHorizontal(const struct FInputActionValue& value);
 	
-	void Fire(const struct FInputActionValue& value);
+	
+	void StartFire();
+	void Fire();
+	void EndFire();
+	
+	void ChangeWeapon(const struct FInputActionValue& value);
 	
 	void Dash(const struct FInputActionValue& value);
 };

@@ -34,7 +34,6 @@ void UEnemyIndicatorWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 	   screenPos.X >= screenMargin && screenPos.X <= viewportSize.X - screenMargin && 
 	   screenPos.Y >= screenMargin && screenPos.Y <= viewportSize.Y - screenMargin)
 	{
-		//SetVisibility(ESlateVisibility::Hidden);
 		
 		SetRenderOpacity(0.0f);
 		return;
@@ -42,8 +41,6 @@ void UEnemyIndicatorWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 	
 	// 4. 화면 밖일 때 표시
 	
-	UE_LOG(LogTemp, Warning, TEXT("testtestset"));
-	//SetVisibility(ESlateVisibility::Visible);
 	SetRenderOpacity(1.0f);
 	// 5. 방향 계산 (픽셀 - 픽셀 이므로 완벽하게 작동!)
 	FVector2D dir = screenPos - screenCenter;

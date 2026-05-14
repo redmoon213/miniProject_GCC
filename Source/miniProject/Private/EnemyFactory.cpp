@@ -4,6 +4,7 @@
 #include "EnemyFactory.h"
 
 #include "Enemy.h"
+#include "EnemySpawnIndicator.h"
 #include "NavigationSystem.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -91,7 +92,8 @@ void AEnemyFactory::SpawnSingleEnemy()
 	{
 		FActorSpawnParameters spawnParams;
 		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		GetWorld()->SpawnActor<AEnemy>(enemy, spawnLocation, FRotator::ZeroRotator, spawnParams);
+		//GetWorld()->SpawnActor<AEnemy>(enemy, spawnLocation, FRotator::ZeroRotator, spawnParams);
+		GetWorld()->SpawnActor<AEnemySpawnIndicator>(spawnIndicator, spawnLocation, FRotator::ZeroRotator, spawnParams);
 		enemiesSpawnLeft--;
 	}
 	

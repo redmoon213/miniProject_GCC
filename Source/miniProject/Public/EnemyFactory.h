@@ -25,10 +25,11 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AEnemy> enemy;
-	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemySpawnIndicator> spawnIndicator;
 	
 	float minSpawnDistance = 300.0f;
-	float maxSpawnDistance = 1500.0f;
+	float maxSpawnDistance = 1000.0f;
 	int32 enemiesSpawnLeft;
 	
 	FTimerHandle enemiesSpawnTimerHandle;

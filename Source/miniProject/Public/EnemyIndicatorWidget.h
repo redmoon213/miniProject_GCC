@@ -20,8 +20,8 @@ public:
 protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	
-	UPROPERTY(meta = (BindWidget))
-	class UImage* ArrowImage;
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UImage* arrowImage;
 	
 	UPROPERTY(EditAnywhere, Category="Indicator")
 	float screenMargin = 50.0f;

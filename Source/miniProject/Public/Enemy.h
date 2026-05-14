@@ -42,6 +42,11 @@ public:
 	
 	FVector dir;
 	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UEnemyIndicatorWidget> indicatorWidget;
+	
+	class UEnemyIndicatorWidget* indicatorInstance;
+	
 	//눈금 텍스쳐 UV 오프셋
 	const FVector2D diceOffset[6] = {
 		FVector2D(0.395f, 0.49f),	//1번 눈금 

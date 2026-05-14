@@ -4,7 +4,9 @@
 #include "Enemy.h"
 
 #include "BulletEnemyBasic.h"
+#include "EnemyIndicatorWidget.h"
 #include "EngineUtils.h"
+#include "Blueprint/UserWidget.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
@@ -84,6 +86,15 @@ void AEnemy::BeginPlay()
 	if (attackMode <1 || attackMode>3 )
 	{
 		attackMode = 1;
+	}
+	
+	indicatorInstance = CreateWidget<UEnemyIndicatorWidget>(GetWorld(), indicatorWidget);
+	if (indicatorInstance != nullptr)
+	{
+		indicatorInstance->SetTarget(this);
+		
+		indicatorInstance->AddToViewport();
+		
 	}
 	
 }

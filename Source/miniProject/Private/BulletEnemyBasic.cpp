@@ -20,6 +20,8 @@ ABulletEnemyBasic::ABulletEnemyBasic()
 	
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Enemy Bullet Mesh Component"));
 	meshComp->SetupAttachment(boxComp);
+	
+	boxComp->SetCollisionProfileName("EnemyBullet");
 }
 
 // Called when the game starts or when spawned

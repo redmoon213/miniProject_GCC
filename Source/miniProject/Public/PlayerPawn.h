@@ -57,7 +57,7 @@ public:
 	class UInputAction* iaDash;
 	
 	UPROPERTY(EditAnywhere)
-	float movementSpeed = 500.0f;
+	float movementSpeed = 1000.0f;
 	
 	// 플레이어 커서 위젯을 담을 변수
 	UPROPERTY(EditAnywhere)

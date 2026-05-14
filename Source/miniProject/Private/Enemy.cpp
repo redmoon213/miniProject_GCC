@@ -108,28 +108,30 @@ void AEnemy::Tick(float DeltaTime)
 	{
 		return;
 	}
-	
+	bool isBeingKnockback = false;
 	// 넉백 구현 코드
-	if (!knockbackSpeed.IsNearlyZero())
+	if (!knockbackSpeed.IsNearlyZero(100.0f))
 	{
 		AddActorWorldOffset(knockbackSpeed * DeltaTime, true);
 		
 		knockbackSpeed = FMath::VInterpTo(knockbackSpeed, FVector::ZeroVector, DeltaTime, 5.0f);
+		isBeingKnockback = true;
 	}
 	
-	
-	switch (attackMode)
+	if (!isBeingKnockback)
 	{
-	case 1: MoveToPlayer(DeltaTime);
-		break;
-	case 2: FireProjectileMode(DeltaTime);
-		break;
-	case 3: ChargingMode(DeltaTime);
-		break;
-	default:
-		MoveToPlayer(DeltaTime);
+		switch (attackMode)
+		{
+		case 1: MoveToPlayer(DeltaTime);
+			break;
+		case 2: FireProjectileMode(DeltaTime);
+			break;
+		case 3: ChargingMode(DeltaTime);
+			break;
+		default:
+			MoveToPlayer(DeltaTime);
+		}
 	}
-	
 }
 
 void AEnemy::UpdateDiceEye()
@@ -172,7 +174,11 @@ void AEnemy::ResetHitFlash()
 
 void AEnemy::Knockback(FVector bulletDirection)
 {
-	knockbackSpeed = bulletDirection * 500.0f;
+	if (isCharging)
+	{
+		return;
+	}
+	knockbackSpeed = bulletDirection * 1000.0f;
 }
 
 

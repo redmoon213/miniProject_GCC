@@ -66,7 +66,7 @@ void UEnemyIndicatorWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 	else 
 	{
 		dir *= (boundsY / absDirY);
-	}
+	}	
     
 	// 8. 최종 위치 설정 (픽셀 좌표)
 	FVector2D finalPos = screenCenter + dir;

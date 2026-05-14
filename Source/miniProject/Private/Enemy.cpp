@@ -5,7 +5,6 @@
 
 #include "BulletEnemyBasic.h"
 #include "EngineUtils.h"
-#include "PlayerPawn.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
@@ -62,16 +61,7 @@ void AEnemy::BeginPlay()
 	currentDiceEye = FMath::RandRange(1, 6);
 	UpdateDiceEye();
 	
-	
-	//생성시 플레이어 방향으로 이동하게 하는 코드
-	for (TActorIterator<APlayerPawn> player(GetWorld()); player; ++player)
-	{
-		if (player->GetName().Contains(TEXT("BP_PlayerPawn")))
-		{
-			dir = player->GetActorLocation() - GetActorLocation();
-			dir.Normalize();
-		}
-	}
+	player = UGameplayStatics::GetPlayerPawn(this, 0);
 	
 	// 공격 데칼 설정
 	if (attackDecalComp->GetDecalMaterial() != nullptr)
@@ -103,6 +93,11 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	if (!IsValid(player))
+	{
+		return;
+	}
+	
 	// 넉백 구현 코드
 	if (!knockbackSpeed.IsNearlyZero())
 	{
@@ -111,24 +106,17 @@ void AEnemy::Tick(float DeltaTime)
 		knockbackSpeed = FMath::VInterpTo(knockbackSpeed, FVector::ZeroVector, DeltaTime, 5.0f);
 	}
 	
-	//근접공격 if attackMode = 1
-	if (attackMode ==1)
+	
+	switch (attackMode)
 	{
+	case 1: MoveToPlayer(DeltaTime);
+		break;
+	case 2: FireProjectileMode(DeltaTime);
+		break;
+	case 3: ChargingMode(DeltaTime);
+		break;
+	default:
 		MoveToPlayer(DeltaTime);
-	}
-	
-	//투사체 공격 if attackMode = 2
-	if (attackMode == 2)
-	{
-		FireProjectileMode(DeltaTime);
-		
-		
-	}
-	
-	//차지 공격 if attackMode = 3
-	if (attackMode == 3)
-	{
-		ChargingMode(DeltaTime);
 	}
 	
 }
@@ -201,11 +189,7 @@ void AEnemy::FireProjectile()
 
 void AEnemy::MoveToPlayer(float deltaTime)
 {
-	APawn* player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (player == nullptr)
-	{
-		return;
-	}
+	
 	
 	FVector direction = player->GetActorLocation() - GetActorLocation();
 	direction.Z = 0.0f;
@@ -222,11 +206,8 @@ void AEnemy::MoveToPlayer(float deltaTime)
 
 void AEnemy::FireProjectileMode(float deltaTime)
 {
-	APawn* player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (player == nullptr)
-	{
-		return;
-	}
+	
+	
 	
 	FVector dirToPlayer = player->GetActorLocation() - GetActorLocation();
 	FVector enemyLocation = GetActorLocation();
@@ -288,11 +269,7 @@ void AEnemy::ChargingMode(float deltaTime)
 	
 	if (!isCharging)
 	{
-		APawn* player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-		if (player == nullptr)
-		{
-			return;
-		}
+		
 	
 		FVector dirToPlayer = player->GetActorLocation() - GetActorLocation();
 		FVector enemyLocation = GetActorLocation();

@@ -9,6 +9,7 @@
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -79,12 +80,16 @@ void AEnemy::BeginPlay()
 	}
 	
 	attackDecalComp->SetHiddenInGame(true);
+	
+	
 	isCharging = false;
-	maxChargeTime = 3.0f;
+	maxChargeTime = 1.5f;
+	
 	////////
 	
 	//생성된 주사위가 어떤 행동을 할지 결정?
 	attackMode = FMath::RandRange(1,3);
+	
 	
 	if (attackMode <1 || attackMode>3 )
 	{
@@ -101,40 +106,31 @@ void AEnemy::Tick(float DeltaTime)
 	// 넉백 구현 코드
 	if (!knockbackSpeed.IsNearlyZero())
 	{
-		AddActorWorldOffset(knockbackSpeed * DeltaTime, false);
+		AddActorWorldOffset(knockbackSpeed * DeltaTime, true);
 		
 		knockbackSpeed = FMath::VInterpTo(knockbackSpeed, FVector::ZeroVector, DeltaTime, 5.0f);
 	}
 	
-	// 이동 구현 코드
-	//FVector newLocation = GetActorLocation() + dir * moveSpeed * DeltaTime;
-	//SetActorLocation(newLocation, true);
-	
 	//근접공격 if attackMode = 1
-	
+	if (attackMode ==1)
+	{
+		MoveToPlayer(DeltaTime);
+	}
 	
 	//투사체 공격 if attackMode = 2
-	
+	if (attackMode == 2)
+	{
+		FireProjectileMode(DeltaTime);
+		
+		
+	}
 	
 	//차지 공격 if attackMode = 3
-	
-	
-	// 차지공격 구현 코드
-	if (isCharging && dynamicAttackMaterial)
+	if (attackMode == 3)
 	{
-		currentChargeTime += DeltaTime;
-		float chargePercent = FMath::Clamp(currentChargeTime/maxChargeTime, 0.f, 1.f);
-		
-		dynamicAttackMaterial->SetScalarParameterValue(TEXT("Percent"), chargePercent);
-		
-		if (chargePercent >= 1.0f)
-		{
-			isCharging = false;
-			attackDecalComp->SetHiddenInGame(true);
-			
-			ChargingExcute();
-		}
+		ChargingMode(DeltaTime);
 	}
+	
 }
 
 void AEnemy::UpdateDiceEye()
@@ -164,7 +160,6 @@ void AEnemy::diceTakeDamage()
 	
 	GetWorld()->GetTimerManager().SetTimer(hitFlashTimer, this, &AEnemy::ResetHitFlash, 0.1f, false);
 	
-	Charging();
 	
 }
 
@@ -202,4 +197,151 @@ void AEnemy::FireProjectile()
 		);
 	
 	
+}
+
+void AEnemy::MoveToPlayer(float deltaTime)
+{
+	APawn* player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (player == nullptr)
+	{
+		return;
+	}
+	
+	FVector direction = player->GetActorLocation() - GetActorLocation();
+	direction.Z = 0.0f;
+	direction.Normalize();
+	
+	FRotator targetRotation = direction.Rotation();
+	
+	FRotator currentRotation = GetActorRotation();
+	FRotator smoothRotation = FMath::RInterpTo(currentRotation, targetRotation, deltaTime, 5.0f);
+	
+	AddActorWorldOffset(direction * deltaTime * moveSpeed, false);
+	SetActorRotation(smoothRotation);
+}
+
+void AEnemy::FireProjectileMode(float deltaTime)
+{
+	APawn* player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+	if (player == nullptr)
+	{
+		return;
+	}
+	
+	FVector dirToPlayer = player->GetActorLocation() - GetActorLocation();
+	FVector enemyLocation = GetActorLocation();
+	
+	float distance = dirToPlayer.Size();
+	dirToPlayer.Normalize();
+	
+	SetActorRotation(dirToPlayer.Rotation());
+	FVector moveDirection = FVector::ZeroVector;
+	
+	float minDistance = 400.0f;
+	float maxDistance = 800.0f;
+	
+	if (distance > maxDistance)
+	{
+		moveDirection += dirToPlayer;
+	}
+	
+	else if (distance < minDistance)
+	{
+		moveDirection -= dirToPlayer;
+	}
+	
+	FVector rightVector = GetActorRightVector();
+	float wiggleSpeed = 2.0f;
+	float wiggleIntensity = 1.0f;
+	
+	float sineValue = FMath::Sin(GetWorld()->GetTimeSeconds() * wiggleSpeed);
+	moveDirection += rightVector * sineValue * wiggleIntensity;
+	
+	if (!moveDirection.IsNearlyZero())
+	{
+		moveDirection.Normalize();
+		AddActorWorldOffset(moveDirection * moveSpeed * deltaTime, true);
+	}
+	
+	
+	currentProjectileCooldown += deltaTime;
+	
+	if (currentProjectileCooldown>=maxProjectileCooldown)
+	{
+		ABulletEnemyBasic* enemyBullet = GetWorld()->SpawnActor<ABulletEnemyBasic>(bulletFactory,
+			firePosition->GetComponentLocation(), firePosition->GetComponentRotation()
+		);
+		
+		currentProjectileCooldown = 0.0f;
+	}
+}
+
+void AEnemy::ChargingMode(float deltaTime)
+{
+	currentChargeCoolTime += deltaTime;
+	
+	if (currentChargeCoolTime >= 3.0f)
+	{
+		Charging();
+		currentChargeCoolTime = 0.0f;
+	}
+	
+	if (!isCharging)
+	{
+		APawn* player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		if (player == nullptr)
+		{
+			return;
+		}
+	
+		FVector dirToPlayer = player->GetActorLocation() - GetActorLocation();
+		FVector enemyLocation = GetActorLocation();
+	
+		float distance = dirToPlayer.Size();
+		dirToPlayer.Normalize();
+	
+		SetActorRotation(dirToPlayer.Rotation());
+		FVector moveDirection = FVector::ZeroVector;
+	
+		float minDistance = 400.0f;
+		float maxDistance = 800.0f;
+	
+		if (distance > maxDistance)
+		{
+			moveDirection += dirToPlayer;
+		}
+	
+		else if (distance < minDistance)
+		{
+			moveDirection -= dirToPlayer;
+		}
+	
+		FVector rightVector = GetActorRightVector();
+		float wiggleSpeed = 2.0f;
+		float wiggleIntensity = 1.0f;
+	
+		float sineValue = FMath::Sin(GetWorld()->GetTimeSeconds() * wiggleSpeed);
+		moveDirection += rightVector * sineValue * wiggleIntensity;
+	
+		if (!moveDirection.IsNearlyZero())
+		{
+			moveDirection.Normalize();
+			AddActorWorldOffset(moveDirection * moveSpeed * deltaTime, true);
+		}
+	}
+	if (isCharging && dynamicAttackMaterial)
+	{
+		currentChargeTime += deltaTime;
+		float chargePercent = FMath::Clamp(currentChargeTime/maxChargeTime, 0.f, 1.f);
+		
+		dynamicAttackMaterial->SetScalarParameterValue(TEXT("Percent"), chargePercent);
+		
+		if (chargePercent >= 1.0f)
+		{
+			isCharging = false;
+			attackDecalComp->SetHiddenInGame(true);
+			
+			ChargingExcute();
+		}
+	}
 }

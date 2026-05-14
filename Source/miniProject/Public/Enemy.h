@@ -62,14 +62,19 @@ public:
 	bool isCharging = false;
 	float currentChargeTime;
 	float maxChargeTime;
-	
+	float currentChargeCoolTime = 0.0f;
 	
 	void Charging();
 	void ChargingExcute();
 	///////////////////////////////////////
 	
-	
 	// 일반 투사체공격 구현을 위한 변수 및 함수 //
+	
+	bool isProjectileReady = false;
+	float currentProjectileCooldown = 0.0f;
+	float maxProjectileCooldown = 2.0f;
+	
+	
 	UPROPERTY(EditAnywhere)
 	class UArrowComponent* firePosition;
 	
@@ -88,7 +93,8 @@ public:
 	void ResetHitFlash();
 	void Knockback(FVector bulletDirection);
 	
-	
-	
+	void MoveToPlayer(float deltaTime);
+	void FireProjectileMode(float deltaTime);
+	void ChargingMode(float deltaTime);
 	void UpdateDiceEye();
 };

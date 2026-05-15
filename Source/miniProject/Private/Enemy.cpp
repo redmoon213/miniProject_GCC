@@ -4,6 +4,7 @@
 #include "Enemy.h"
 
 #include "BulletEnemyBasic.h"
+#include "DroppedAmmo.h"
 #include "EnemyIndicatorWidget.h"
 #include "EngineUtils.h"
 #include "Blueprint/UserWidget.h"
@@ -156,7 +157,7 @@ void AEnemy::diceTakeDamage()
 {
 	if (currentDiceEye == 1)
 	{
-		this->Destroy();
+		Die();
 	}
 	
 	else
@@ -353,4 +354,18 @@ void AEnemy::OnOverlapToPlayer(UPrimitiveComponent* OverlappedComponent, AActor*
 	{
 		UGameplayStatics::ApplyDamage(OtherActor, 1.0f, nullptr, this, nullptr);
 	}
+}
+
+void AEnemy::Die()
+{
+	float dropRate = FMath::Rand();
+	
+	GetWorld()->SpawnActor<AActor>(debrisClass, GetActorLocation(), GetActorRotation());
+	
+	
+	GetWorld()->SpawnActor<ADroppedAmmo>(droppedAmmoClass, GetActorLocation(), GetActorRotation());
+	
+	
+	
+	Destroy();
 }

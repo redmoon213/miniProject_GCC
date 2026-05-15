@@ -335,6 +335,10 @@ void APlayerPawn::ChangeWeapon(const struct FInputActionValue& value)
 float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	
+	if (DamageCauser&&DamageCauser->ActorHasTag((FName("Debris"))))
+	{
+		return 0.0f;
+	}
 	if (bIsInvincible||playerHp<=0)
 	{
 		return 0.0f;
@@ -345,6 +349,7 @@ float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 	if (playerHp <= 0)
 	{
 		//사망처리
+		UE_LOG(LogTemp, Warning, TEXT("Damage: %f, Current HP: %d"), DamageAmount, playerHp);
 		Destroy();
 	}
 	

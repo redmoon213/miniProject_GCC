@@ -20,7 +20,7 @@ void UPlayerMagUI::NativeConstruct()
 
 void UPlayerMagUI::UpdataAmmo(int32 currentAmmo, int32 maxAmmo)
 {
-	if (currentAmmo && maxAmmo >0)
+	if (maxAmmo>0)
 	{
 		float ammoRatio = (float)currentAmmo / (float)maxAmmo;
 		ammoRingMID->SetScalarParameterValue(TEXT("AmmoPercent"), ammoRatio);

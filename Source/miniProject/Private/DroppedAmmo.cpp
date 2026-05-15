@@ -3,7 +3,9 @@
 
 #include "DroppedAmmo.h"
 
+#include "PlayerPawn.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -27,6 +29,7 @@ void ADroppedAmmo::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	boxComp->OnComponentBeginOverlap.AddDynamic(this, &ADroppedAmmo::OnOverlapBegin);
 }
 
 // Called every frame
@@ -35,3 +38,15 @@ void ADroppedAmmo::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
+void ADroppedAmmo::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("<TEST> droppedAmmo"));
+	
+	APlayerPawn* player = Cast<APlayerPawn>(OtherActor);
+	if (player)
+	{
+		player->LootAmmo(ammoAmount);
+		Destroy();
+	}
+	
+}

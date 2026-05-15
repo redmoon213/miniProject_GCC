@@ -251,9 +251,15 @@ void APlayerPawn::Fire()
 	
 	ABulletPlayerBasic* bulletPlayer = GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactory,
 		firePosition->GetComponentLocation(), firePosition->GetComponentRotation());
-	currentAmmo--;
-	playerMagUIInstance->UpdataAmmo(currentAmmo,maxAmmo);
-	
+	if (currentAmmo <= 0)
+	{
+		return;
+	}
+	else
+	{
+		currentAmmo--;
+		playerMagUIInstance->UpdataAmmo(currentAmmo,maxAmmo);
+	}
 }
 
 
@@ -360,4 +366,11 @@ void APlayerPawn::ResetInvincibility()
 {
 	bIsInvincible = false;
 	dynamicMaterial->SetScalarParameterValue(TEXT("HitFlash"), 0.0f);
+}
+
+void APlayerPawn::LootAmmo(int32 ammoAmount)
+{
+	currentAmmo = FMath::Min(currentAmmo + ammoAmount, maxAmmo);
+	
+	playerMagUIInstance->UpdataAmmo(currentAmmo,maxAmmo);
 }

@@ -131,7 +131,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UPlayerMagUI* playerMagUIInstance;
 	
-	
+	//
+	void LootAmmo(int32 ammoAmount);
 	
 private:
 	//float h;

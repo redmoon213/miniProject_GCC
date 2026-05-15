@@ -80,9 +80,11 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	float autoFireRate = 0.1f;
-	
 	UPROPERTY(EditAnywhere)
 	class USoundBase* fireSound;
+	
+	int32 currentAmmo = 30;
+	int32 maxAmmo = 30;
 	
 	//대쉬기능에 관련된 변수들
 	UPROPERTY(EditAnywhere)
@@ -112,20 +114,24 @@ public:
 	float invincibleDuration = 1.0f;
 	
 	bool bIsInvincible = false;
-	
 	void ResetInvincibility();
 	
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-	
-	UPROPERTY()
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;	UPROPERTY()
 	class UMaterialInstanceDynamic* dynamicMaterial;
 	
-	// 플레이어 체력 UI
+	// 플레이어 UI
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UPlayerHealthUI> playerHealthUIClass;
 	
 	UPROPERTY(EditAnywhere)
 	class UPlayerHealthUI* playerHealthUIInstance;
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UPlayerMagUI> playerMagUIClass;
+	UPROPERTY(EditAnywhere)
+	class UPlayerMagUI* playerMagUIInstance;
+	
+	
 	
 private:
 	//float h;

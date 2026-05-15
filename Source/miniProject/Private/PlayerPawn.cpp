@@ -8,6 +8,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "PlayerCursor.h"
 #include "PlayerHealthUI.h"
+#include "PlayerMagUI.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
@@ -70,14 +71,24 @@ void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	// 위젯 생성코드는 무조건 BeginPlay안에 넣어야함 생성자에 넣으면 크래시 난다고함
+	
 	playerCursorInstance = CreateWidget<UPlayerCursor>(GetWorld(), playerCursorClass);
 	
+	//플레이어 체력바 UI
 	playerHealthUIInstance =  CreateWidget<UPlayerHealthUI>(GetWorld(), playerHealthUIClass);
-	
 	if (playerHealthUIInstance != nullptr)
 	{
 		playerHealthUIInstance->AddToViewport();
 		playerHealthUIInstance->UpdateHealthIcon(playerHp);
+	}
+	
+	//플레이어 총알 UI
+	playerMagUIInstance = CreateWidget<UPlayerMagUI>(GetWorld(), playerMagUIClass);
+	if (playerMagUIInstance != nullptr)
+	{
+		playerMagUIInstance->AddToViewport();
+		playerMagUIInstance->SetVisibility(ESlateVisibility::Collapsed);
+		
 	}
 	
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
@@ -182,6 +193,7 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	}
 }
 
+///플레이어 이동 구현
 void APlayerPawn::OnInputHorizontal(const struct FInputActionValue& value)
 {
 	//h = value.Get<float>();
@@ -200,7 +212,6 @@ void APlayerPawn::OnInputHorizontal(const struct FInputActionValue& value)
 
 void APlayerPawn::OnInputVertical(const struct FInputActionValue& value)
 {
-	//v = value.Get<float>();
 	
 	float vValue = value.Get<float>();
 	
@@ -215,6 +226,8 @@ void APlayerPawn::OnInputVertical(const struct FInputActionValue& value)
 	}
 }
 
+
+/// 플레이어 총알 발사 구현
 void APlayerPawn::StartFire()
 {
 	Fire();
@@ -238,9 +251,14 @@ void APlayerPawn::Fire()
 	
 	ABulletPlayerBasic* bulletPlayer = GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactory,
 		firePosition->GetComponentLocation(), firePosition->GetComponentRotation());
+	currentAmmo--;
+	playerMagUIInstance->UpdataAmmo(currentAmmo,maxAmmo);
 	
 }
 
+
+
+/// 플레이어 대시 구현
 void APlayerPawn::Dash(const struct FInputActionValue& value)
 {
 	
@@ -289,14 +307,25 @@ void APlayerPawn::DashFinished()
 	isDashing = false;
 }
 
+///플레이어 무기 교체 구현
 void APlayerPawn::ChangeWeapon(const struct FInputActionValue& value)
 {
 	float getValue = value.Get<float>();
 	
 	fireMode = FMath::RoundToInt32(getValue);
 	
+	if (fireMode == 2)
+	{
+		playerMagUIInstance->SetVisibility(ESlateVisibility::Visible);
+	}
+	
+	else
+	{
+		playerMagUIInstance->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
+///플레이어 피해받을때 처리하는 기능
 float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	

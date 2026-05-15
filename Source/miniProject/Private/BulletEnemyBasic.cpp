@@ -4,6 +4,7 @@
 #include "BulletEnemyBasic.h"
 
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -29,6 +30,9 @@ void ABulletEnemyBasic::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	boxComp->OnComponentBeginOverlap.AddDynamic(this, &ABulletEnemyBasic::OnOverlapToPlayer);
+	
+	player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 }
 
 // Called every frame
@@ -42,3 +46,11 @@ void ABulletEnemyBasic::Tick(float DeltaTime)
 	
 }
 
+void ABulletEnemyBasic::OnOverlapToPlayer(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor==player)
+	{
+		UGameplayStatics::ApplyDamage(player, 1.0f, nullptr, this, nullptr);
+		Destroy();
+	}
+}

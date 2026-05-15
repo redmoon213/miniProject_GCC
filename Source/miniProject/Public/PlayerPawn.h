@@ -77,7 +77,9 @@ public:
 	
 	int32 fireMode = 1;
 	FTimerHandle autoFireTimerHandle;
-	float autoFireRate = 0.3f;
+	
+	UPROPERTY(EditAnywhere)
+	float autoFireRate = 0.1f;
 	
 	UPROPERTY(EditAnywhere)
 	class USoundBase* fireSound;
@@ -100,7 +102,23 @@ public:
 	UFUNCTION()
 	void DashFinished();
 	
+	//플레이어가 피해를 입을때 사용할 변수와 함수
+	FTimerHandle invincibleTimerHandle;
 	
+	UPROPERTY(EditAnywhere)
+	int32 playerHp = 6;
+	
+	UPROPERTY(editAnywhere)
+	float invincibleDuration = 1.0f;
+	
+	bool bIsInvincible = false;
+	
+	void ResetInvincibility();
+	
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	
+	UPROPERTY()
+	class UMaterialInstanceDynamic* dynamicMaterial;
 private:
 	//float h;
 	//float v;

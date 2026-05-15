@@ -98,6 +98,14 @@ void APlayerPawn::BeginPlay()
 		finishedEvent.BindUFunction(this, FName("DashFinished"));
 		dashTimelineComp->SetTimelineFinishedFunc(finishedEvent);
 	}
+	
+	//피해 받을때 깜빡이게 하기위한 다이나믹마테리얼
+	
+	UMaterialInterface* baseMaterial = meshComp->GetMaterial(0);
+	if (baseMaterial != nullptr)
+	{
+		dynamicMaterial = meshComp->CreateDynamicMaterialInstance(0, baseMaterial);
+	}
 }
 
 // Called every frame
@@ -125,6 +133,17 @@ void APlayerPawn::Tick(float DeltaTime)
 			FRotator smoothRotation = FMath::RInterpTo(currentRotation, playerLookRotation, DeltaTime, 10.0f); // 10.0f는 회전 속도
 			SetActorRotation(smoothRotation);
 		}
+		
+	}
+	
+	if (dynamicMaterial != nullptr && bIsInvincible)
+	{
+		float sineValue = FMath::Sin(GetWorld()->GetTimeSeconds() * 30.0f);
+		
+		float flashValue = (sineValue > 0.0f) ? 1.0f : 0.0f;
+		
+		dynamicMaterial->SetScalarParameterValue(TEXT("HitFlash"), flashValue);
+		
 		
 	}
 	
@@ -268,4 +287,37 @@ void APlayerPawn::ChangeWeapon(const struct FInputActionValue& value)
 	
 	fireMode = FMath::RoundToInt32(getValue);
 	
+}
+
+float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	
+	if (bIsInvincible||playerHp<=0)
+	{
+		return 0.0f;
+	}
+	
+	playerHp -= FMath::RoundToInt32(DamageAmount);
+	
+	if (playerHp <= 0)
+	{
+		//사망처리
+		Destroy();
+	}
+	
+	else
+	{
+		
+		bIsInvincible = true;
+		GetWorld()->GetTimerManager().SetTimer(invincibleTimerHandle, this, &APlayerPawn::ResetInvincibility, invincibleDuration, false);
+
+	}
+	
+	return DamageAmount;
+}
+
+void APlayerPawn::ResetInvincibility()
+{
+	bIsInvincible = false;
+	dynamicMaterial->SetScalarParameterValue(TEXT("HitFlash"), 0.0f);
 }

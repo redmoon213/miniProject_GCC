@@ -80,13 +80,15 @@ void AEnemy::BeginPlay()
 	////////
 	
 	//생성된 주사위가 어떤 행동을 할지 결정?
-	attackMode = FMath::RandRange(1,3);
-	
+	//attackMode = FMath::RandRange(1,3);
+	attackMode = 1;
 	
 	if (attackMode <1 || attackMode>3 )
 	{
 		attackMode = 1;
 	}
+	
+	boxComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnOverlapToPlayer);
 	
 	indicatorInstance = CreateWidget<UEnemyIndicatorWidget>(GetWorld(), indicatorWidget);
 	if (indicatorInstance != nullptr)
@@ -217,7 +219,7 @@ void AEnemy::MoveToPlayer(float deltaTime)
 	FRotator currentRotation = GetActorRotation();
 	FRotator smoothRotation = FMath::RInterpTo(currentRotation, targetRotation, deltaTime, 5.0f);
 	
-	AddActorWorldOffset(direction * deltaTime * moveSpeed, false);
+	AddActorWorldOffset(direction * deltaTime * moveSpeed, true);
 	SetActorRotation(smoothRotation);
 }
 
@@ -337,5 +339,13 @@ void AEnemy::ChargingMode(float deltaTime)
 			
 			ChargingExcute();
 		}
+	}
+}
+
+void AEnemy::OnOverlapToPlayer(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor == player)
+	{
+		UGameplayStatics::ApplyDamage(OtherActor, 1.0f, nullptr, this, nullptr);
 	}
 }

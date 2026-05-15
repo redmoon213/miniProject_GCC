@@ -8,6 +8,15 @@
 #include "Kismet/GameplayStatics.h"
 
 
+void UEnemyIndicatorWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	// PlayerController를 미리 찾아서 변수에 저장(캐싱)합니다.
+	cachedPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+}
+
+
 void UEnemyIndicatorWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
@@ -19,15 +28,27 @@ void UEnemyIndicatorWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 		return;
 	}
 
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (!PC) return;
+	// 수정 전 코드
+	// APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	// if (!PC) return;
+	
+	// 캐싱된 컨트롤러가 유효한지 확인합니다.
+	if (!cachedPC)
+	{
+		return;
+	}
 
 	// 2. 모든 계산을 '픽셀(Pixel) 좌표'로 통일합니다! (DPI 스케일 직접 계산 X)
 	FVector2D viewportSize = UWidgetLayoutLibrary::GetViewportSize(GetWorld());
 	FVector2D screenCenter = viewportSize / 2.0f;
     
 	FVector2D screenPos;
-	bool bProjected = PC->ProjectWorldLocationToScreen(targetActor->GetActorLocation(), screenPos);
+	
+	// 수정 전 코드
+	// bool bProjected = PC->ProjectWorldLocationToScreen(targetActor->GetActorLocation(), screenPos);
+	
+	// 캐싱된 컨트롤러를 사용하여 월드 좌표를 화면 좌표로 변환합니다.
+	bool bProjected = cachedPC->ProjectWorldLocationToScreen(targetActor->GetActorLocation(), screenPos);
 
 	// 3. 화면 안에 있는지 체크 (픽셀 기준)
 	if (bProjected && 

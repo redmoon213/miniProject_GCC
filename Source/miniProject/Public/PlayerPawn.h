@@ -28,7 +28,8 @@ public:
 	//박스콜리전과 스태틱메시 컴포넌트
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* boxComp;
-	
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* damageBoxComp;
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* meshComp;
 	

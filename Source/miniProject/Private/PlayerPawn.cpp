@@ -26,6 +26,8 @@ APlayerPawn::APlayerPawn()
 	boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("My Box Component"));
 	SetRootComponent(boxComp);
 	
+	damageBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Damage Box Component"));
+	damageBoxComp->SetupAttachment(boxComp);
 	
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("My StaticMesh Component"));
 	meshComp->SetupAttachment(boxComp);

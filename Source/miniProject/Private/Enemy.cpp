@@ -362,8 +362,7 @@ void AEnemy::Die()
 	
 	GetWorld()->SpawnActor<AActor>(debrisClass, GetActorLocation(), GetActorRotation());
 	
-	
-	GetWorld()->SpawnActor<ADroppedAmmo>(droppedAmmoClass, GetActorLocation(), GetActorRotation());
+	//GetWorld()->SpawnActor<ADroppedAmmo>(droppedAmmoClass, GetActorLocation(), GetActorRotation());
 	
 	
 	

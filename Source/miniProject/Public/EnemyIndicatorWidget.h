@@ -18,6 +18,7 @@ public:
 	void SetTarget(AActor* Target);
 	
 protected:
+	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
@@ -30,5 +31,8 @@ private:
 	
 	UPROPERTY()
 	AActor* targetActor;
+
+	UPROPERTY()
+	class APlayerController* cachedPC;
 	
 };

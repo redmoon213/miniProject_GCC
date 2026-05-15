@@ -27,6 +27,10 @@ public:
 	class UBoxComponent* boxComp;
 	
 	UPROPERTY(EditAnywhere)
+	class UBoxComponent* damageBoxComp;
+	
+	
+	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* meshComp;
 	
 	UPROPERTY(EditAnywhere)

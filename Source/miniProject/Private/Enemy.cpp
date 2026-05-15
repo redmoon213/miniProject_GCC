@@ -24,13 +24,15 @@ AEnemy::AEnemy()
 	SetRootComponent(boxComp);
 	FVector boxSize = FVector(50.f, 50.f, 50.f);
 	boxComp->SetBoxExtent(boxSize);
-	boxComp->SetCollisionProfileName(TEXT("Enemy"));
 	
 	//메쉬 컴포넌트 설정
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("My Mesh Component"));
 	meshComp->SetupAttachment(boxComp);
 	
-	
+	//데미지 박스 컴포넌트 설정
+	damageBoxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Damage Box Component"));
+	damageBoxComp->SetupAttachment(boxComp);
+	boxComp->SetCollisionProfileName(TEXT("Enemy"));
 	
 	// 데칼 컴포넌트 설정
 	attackDecalComp = CreateDefaultSubobject<UDecalComponent>(TEXT("Attack Decal Component"));
@@ -88,8 +90,11 @@ void AEnemy::BeginPlay()
 		attackMode = 1;
 	}
 	
-	boxComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnOverlapToPlayer);
+	//히트시 판정처리를 위한 함수연결
+	damageBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnOverlapToPlayer);
 	
+	
+	// 화면밖 적을 가리키기위한 위젯 생성
 	indicatorInstance = CreateWidget<UEnemyIndicatorWidget>(GetWorld(), indicatorWidget);
 	if (indicatorInstance != nullptr)
 	{

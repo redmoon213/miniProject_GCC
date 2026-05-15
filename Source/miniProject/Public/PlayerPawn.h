@@ -119,6 +119,14 @@ public:
 	
 	UPROPERTY()
 	class UMaterialInstanceDynamic* dynamicMaterial;
+	
+	// 플레이어 체력 UI
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UPlayerHealthUI> playerHealthUIClass;
+	
+	UPROPERTY(EditAnywhere)
+	class UPlayerHealthUI* playerHealthUIInstance;
+	
 private:
 	//float h;
 	//float v;

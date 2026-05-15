@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "PlayerCursor.h"
+#include "PlayerHealthUI.h"
 #include "Camera/CameraComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
@@ -71,6 +72,13 @@ void APlayerPawn::BeginPlay()
 	// 위젯 생성코드는 무조건 BeginPlay안에 넣어야함 생성자에 넣으면 크래시 난다고함
 	playerCursorInstance = CreateWidget<UPlayerCursor>(GetWorld(), playerCursorClass);
 	
+	playerHealthUIInstance =  CreateWidget<UPlayerHealthUI>(GetWorld(), playerHealthUIClass);
+	
+	if (playerHealthUIInstance != nullptr)
+	{
+		playerHealthUIInstance->AddToViewport();
+		playerHealthUIInstance->UpdateHealthIcon(playerHp);
+	}
 	
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
 	if (pc != nullptr)
@@ -307,7 +315,10 @@ float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 	
 	else
 	{
-		
+		if (playerHealthUIInstance != nullptr)
+		{
+			playerHealthUIInstance->UpdateHealthIcon(playerHp);
+		}
 		bIsInvincible = true;
 		GetWorld()->GetTimerManager().SetTimer(invincibleTimerHandle, this, &APlayerPawn::ResetInvincibility, invincibleDuration, false);
 

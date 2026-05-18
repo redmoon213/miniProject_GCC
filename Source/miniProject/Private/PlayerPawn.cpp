@@ -51,7 +51,7 @@ APlayerPawn::APlayerPawn()
 	
 	//부드러운 추적을 위한 설정
 	springArmComp->bEnableCameraLag = true;
-	springArmComp->CameraLagSpeed = 5.0f;  // 값이 느릴수록 부드럽고 천천히 따라옴
+	springArmComp->CameraLagSpeed = 40.0f;  // 값이 느릴수록 부드럽고 천천히 따라옴
 	
 	firePosition = CreateDefaultSubobject<UArrowComponent>(TEXT("My Fire Position Component"));
 	firePosition->SetupAttachment(boxComp);
@@ -133,6 +133,13 @@ void APlayerPawn::BeginPlay()
 void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// 탄퍼짐 회복 로직: 매 프레임마다 현재 탄퍼짐을 최소치로 줄입니다.
+	if (currentSpread > minSpread)
+	{
+		// FMath::Max: 두 값 중 더 큰 값을 반환하여 최소값 아래로 떨어지지 않게 합니다.
+		currentSpread = FMath::Max(currentSpread - (spreadRecoveryRate * DeltaTime), minSpread);
+	}
 	
 	APlayerController* pc = Cast<APlayerController>(GetController());
 	
@@ -250,17 +257,68 @@ void APlayerPawn::EndFire()
 
 void APlayerPawn::Fire()
 {
-	
-	ABulletPlayerBasic* bulletPlayer = GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactory,
-		firePosition->GetComponentLocation(), firePosition->GetComponentRotation());
+	// 1. 기본총(fireMode 1)일 때만 재사격 쿨타임 체크
+	if (fireMode == 1)
+	{
+		float currentTime = GetWorld()->GetTimeSeconds();
+		if (currentTime - lastFireTime < fireDelay)
+		{
+			return;
+		}
+		lastFireTime = currentTime;
+	}
+
+	// 2. 연사 모드(fireMode 2)일 때만 탄약 체크
+	if (fireMode == 2 && currentAmmo <= 0)
+	{
+		return;
+	}
+
+	// 3. 탄환 생성 위치 및 회전 계산
+	FVector spawnLocation = firePosition->GetComponentLocation();
+	FRotator spawnRotation = firePosition->GetComponentRotation();
+
+	// 4. 현재 누적된 탄퍼짐(currentSpread)을 좌우(Yaw) 방향으로 적용
+	// FMath::RandRange(Min, Max): 지정된 범위 내의 랜덤한 실수를 반환합니다.
+	float randomYaw = FMath::RandRange(-currentSpread, currentSpread);
+	spawnRotation.Yaw += randomYaw;
+
+	// 수정 전 코드
+	/*
 	if (currentAmmo <= 0)
 	{
 		return;
 	}
-	else
+	// ... (중략) ...
+	currentAmmo--;
+	playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+	*/
+
+	// 5. 변형된 회전값으로 탄환 생성 (TArray 기반으로 복구)
+	// ABulletPlayerBasic* bulletPlayer = GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactory,
+	// 	spawnLocation, spawnRotation);
+
+	int32 factoryIndex = fireMode - 1;
+	if (bulletFactories.IsValidIndex(factoryIndex) && bulletFactories[factoryIndex] != nullptr)
+	{
+		ABulletPlayerBasic* bulletPlayer = GetWorld()->SpawnActor<ABulletPlayerBasic>(
+			bulletFactories[factoryIndex],
+			spawnLocation,
+			spawnRotation);
+	}
+
+	// 6. 탄퍼짐 누적: 발사 후 탄퍼짐 값을 증가시킵니다.
+	// FMath::Min: 최대치를 넘지 않도록 보정합니다.
+	currentSpread = FMath::Min(currentSpread + spreadIncrement, maxSpread);
+	
+	// 7. 연사 모드(fireMode 2)일 때만 탄약 소모 및 UI 업데이트
+	if (fireMode == 2)
 	{
 		currentAmmo--;
-		playerMagUIInstance->UpdataAmmo(currentAmmo,maxAmmo);
+		if (playerMagUIInstance != nullptr)
+		{
+			playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+		}
 	}
 }
 

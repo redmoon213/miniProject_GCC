@@ -67,12 +67,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UPlayerCursor> playerCursorClass;
 	
-	//총구 컴포넌트 
+	// 총구 컴포넌트 
 	UPROPERTY(EditAnywhere)
 	class UArrowComponent* firePosition;
 	
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class ABulletPlayerBasic> bulletFactory;
+	// 수정 전 코드
+	// UPROPERTY(EditAnywhere)
+	// TSubclassOf<class ABulletPlayerBasic> bulletFactory;
+	
+	// 무기별 탄환 블루프린트 배열
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TArray<TSubclassOf<class ABulletPlayerBasic>> bulletFactories;
 	
 	//발사 관련 변수
 	
@@ -86,6 +91,23 @@ public:
 	
 	int32 currentAmmo = 30;
 	int32 maxAmmo = 30;
+
+	// 탄퍼짐 관련 변수
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	float minSpread = 0.0f;         // 기본 탄퍼짐 (도 단위)
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	float maxSpread = 10.0f;          // 최대 탄퍼짐 (도 단위) - 범위를 늘림
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	float spreadIncrement = 1.2f;    // 발당 증가량 (상향)
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	float spreadRecoveryRate = 3.0f; // 초당 회복량 (하향)
+
+	float currentSpread = 0.0f;      // 현재 누적된 탄퍼짐
+
+	// 발사 간격 관련 변수
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	float fireDelay = 0.15f;         // 기본총 발사 간격 (초 단위)
+	float lastFireTime = 0.0f;       // 마지막 발사 시간 기록
 	
 	//대쉬기능에 관련된 변수들
 	UPROPERTY(EditAnywhere)

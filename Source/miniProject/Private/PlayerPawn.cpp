@@ -84,13 +84,13 @@ void APlayerPawn::BeginPlay()
 		playerHealthUIInstance->UpdateHealthIcon(playerHp);
 	}
 	
-	//플레이어 총알 UI
+	//플레이어 탄창 UI
 	playerMagUIInstance = CreateWidget<UPlayerMagUI>(GetWorld(), playerMagUIClass);
 	if (playerMagUIInstance != nullptr)
 	{
 		playerMagUIInstance->AddToViewport();
 		playerMagUIInstance->SetVisibility(ESlateVisibility::Collapsed);
-		
+		playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
 	}
 	
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();

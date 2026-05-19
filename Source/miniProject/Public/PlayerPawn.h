@@ -106,7 +106,7 @@ public:
 
 	// 발사 간격 관련 변수
 	UPROPERTY(EditAnywhere, Category = "Weapon")
-	float fireDelay = 0.15f;         // 기본총 발사 간격 (초 단위)
+	float fireDelay = 0.2f; // 기본총 발사 간격 (초 단위)
 	float lastFireTime = 0.0f;       // 마지막 발사 시간 기록
 	
 	//대쉬기능에 관련된 변수들

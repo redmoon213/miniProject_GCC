@@ -6,6 +6,16 @@
 #include "GameFramework/Actor.h"
 #include "EnemyBoss.generated.h"
 
+UENUM(BlueprintType)
+enum class EBoosState : uint8
+{
+	Idle,
+	Moving,
+	Charging,
+	Attacking
+};
+
+
 UCLASS()
 class MINIPROJECT_API AEnemyBoss : public AActor
 {
@@ -121,4 +131,30 @@ public:
 	
 	void MoveStart();
 	void MoveForward(float DeltaTime);
+	//
+	
+	UPROPERTY(EditAnywhere)
+	int32 maxHp;
+	UPROPERTY(EditAnywhere)
+	int32 currentHp;
+	//플레이어를 향해 회전하기 위한 변수와 함수
+	bool bCanRotate = true;
+	void SearchPlayer(float DeltaTime);
+	
+	
+	//보스의 패턴을 결정하기 위한 변수와 함수
+	FTimerHandle bossPatternHandle;
+	void ChoosePattern();
+	void ResetHitFlash();
+	
+	//
+	UFUNCTION()
+	void OnOverlapToPlayer(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	//보스 피격에 관련된 함수와 변수
+	FTimerHandle hitFlashHandle;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
+	UPROPERTY(EditAnywhere)
+	class UMaterialInstanceDynamic* hitFlashDynamicMaterial;
+	//
 };

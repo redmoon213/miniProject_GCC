@@ -50,9 +50,10 @@ void ABulletEnemyBasic::OnOverlapToPlayer(UPrimitiveComponent* OverlappedCompone
 {
 	if (OtherActor==player)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Enemy Bullet Collision"));
 		UGameplayStatics::ApplyDamage(player, 1.0f, nullptr, this, nullptr);
 		Destroy();
 	}
 }
+
+
 

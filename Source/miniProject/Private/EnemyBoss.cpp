@@ -70,6 +70,9 @@ AEnemyBoss::AEnemyBoss()
 	firePosition = CreateDefaultSubobject<UArrowComponent>(TEXT("FirePosition"));
 	firePosition->SetupAttachment(boxComp);
 	
+	boxComp->SetCollisionProfileName("Enemy");
+	maxHp = 100.0f;
+	currentHp = maxHp;
 }
 
 // Called when the game starts or when spawned
@@ -78,7 +81,8 @@ void AEnemyBoss::BeginPlay()
 	Super::BeginPlay();
 
 	player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-
+	boxComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemyBoss::OnOverlapToPlayer);
+	
 	// 다이내믹 머티리얼 인스턴스 생성 및 초기화
 	auto CreateMaterial = [this](UDecalComponent* Decal, UMaterialInstanceDynamic*& Mat) {
 		if (Decal && Decal->GetDecalMaterial()) {
@@ -86,6 +90,12 @@ void AEnemyBoss::BeginPlay()
 			Decal->SetHiddenInGame(true);
 		}
 	};
+	
+	UMaterialInterface* baseMaterial = meshComp->GetMaterial(0);
+	if (baseMaterial)
+	{
+		hitFlashDynamicMaterial = meshComp->CreateDynamicMaterialInstance(0, baseMaterial);
+	}
 
 	CreateMaterial(decalNorth, matNorth);
 	CreateMaterial(decalSouth, matSouth);
@@ -95,7 +105,7 @@ void AEnemyBoss::BeginPlay()
 	//
 	baseZ = GetActorLocation().Z;
 	//// 테스트용: 시작 시 차징 시작
-	GetWorld()->GetTimerManager().SetTimer(testHandle, this ,&AEnemyBoss::StartCrossCharge, 1.5f, true);
+	GetWorld()->GetTimerManager().SetTimer(testHandle, this ,&AEnemyBoss::StartCrossCharge, 2.0f, true);
 	
 	StartProjectileBossPattern();
 	MoveStart();
@@ -114,6 +124,8 @@ void AEnemyBoss::Tick(float DeltaTime)
 		UpdateCrossCharge(DeltaTime);
 	}
 	
+	MoveStart();
+	SearchPlayer(DeltaTime);
 	MoveForward(DeltaTime);
 }
 
@@ -121,7 +133,7 @@ void AEnemyBoss::StartCrossCharge()
 {
 	currentChargeTime = 0.0f;
 	bIsCharging = true;
-	
+	bCanRotate = false;
 	
 	currentRadius += nextRadius;
 	decalGroup->SetRelativeRotation(FRotator(0.0f, currentRadius, 0.0f));
@@ -232,7 +244,7 @@ void AEnemyBoss::ExecuteCrossCharge()
 		}
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("보스: 십자 공격 발동 완료!"));
+	bCanRotate = true;
 }
 
 
@@ -282,6 +294,7 @@ void AEnemyBoss::MoveStart()
 	{
 		bIsMoving = true;
 		hopAlpha = 0.0f;
+		bCanRotate = false;
 	}
 }
 
@@ -307,6 +320,52 @@ void AEnemyBoss::MoveForward(float DeltaTime)
 		FVector finalloc = GetActorLocation();
 		finalloc.Z = baseZ;
 		SetActorLocation(finalloc);
+		bCanRotate = true;
 	}
 	
+}
+
+void AEnemyBoss::SearchPlayer(float DeltaTime)
+{
+	/*if (!bCanRotate)
+	{
+		return;
+	}*/
+	FVector dir = player->GetActorLocation() - GetActorLocation();
+	dir.Z = 0.0f;
+	dir.Normalize();
+	FRotator targetRotation = dir.Rotation();
+	
+	FRotator smoothRotation = FMath::RInterpTo(GetActorRotation(), targetRotation, DeltaTime, 5.0f);
+	
+	SetActorRotation(smoothRotation);
+
+}
+
+float AEnemyBoss::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	currentHp -= FMath::RoundToInt(DamageAmount);
+	
+	hitFlashDynamicMaterial->SetScalarParameterValue("HitFlash", 1.0f);
+	GetWorld()->GetTimerManager().SetTimer(hitFlashHandle, this, &AEnemyBoss::ResetHitFlash, 0.1f, false);
+	
+	if (currentHp <= 0)
+	{
+		Destroy();
+	}
+	
+	return 0.0f;
+}
+
+void AEnemyBoss::ResetHitFlash()
+{
+	hitFlashDynamicMaterial->SetScalarParameterValue("HitFlash", 0.0f);
+}
+
+void AEnemyBoss::OnOverlapToPlayer(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor == player)
+	{
+		UGameplayStatics::ApplyDamage(player, 1.0f, nullptr, this, nullptr);
+	}
 }

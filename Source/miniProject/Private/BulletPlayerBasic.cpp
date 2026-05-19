@@ -5,6 +5,7 @@
 
 #include "Enemy.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -55,11 +56,15 @@ void ABulletPlayerBasic::OnBulletOverlap(UPrimitiveComponent* OverlappedComponen
 {
 	AEnemy* enemyActor = Cast<AEnemy>(OtherActor);
 	
-	if (enemyActor!= nullptr)
+	/*if (enemyActor!= nullptr)
 	{
 		enemyActor->diceTakeDamage();
 		FVector bulletDirection = GetActorForwardVector();
 		enemyActor->Knockback(bulletDirection);
 		this->Destroy();
 	}
+	*/
+	
+	UGameplayStatics::ApplyDamage(OtherActor, 1.0f, nullptr, this, nullptr);
+	Destroy();
 }

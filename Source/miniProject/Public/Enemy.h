@@ -115,6 +115,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ADroppedAmmo> droppedAmmoClass;
 	
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> debrisClass;
 	void Die();

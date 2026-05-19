@@ -362,9 +362,32 @@ void AEnemy::Die()
 	
 	GetWorld()->SpawnActor<AActor>(debrisClass, GetActorLocation(), GetActorRotation());
 	
-	//GetWorld()->SpawnActor<ADroppedAmmo>(droppedAmmoClass, GetActorLocation(), GetActorRotation());
+	GetWorld()->SpawnActor<ADroppedAmmo>(droppedAmmoClass, GetActorLocation(), GetActorRotation());
 	
 	
 	
 	Destroy();
+}
+
+float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+		
+	if (currentDiceEye == 1)
+	{
+		Die();
+	}
+	
+	else
+	{
+		dynamicMaterial->SetScalarParameterValue("HitFlash", 1.0f);
+		currentDiceEye --;
+		UpdateDiceEye();
+	}
+	
+	FVector bulletDirection = DamageCauser->GetActorForwardVector();
+	Knockback(bulletDirection);
+	
+	GetWorld()->GetTimerManager().SetTimer(hitFlashTimer, this, &AEnemy::ResetHitFlash, 0.01f, false);
+	
+	return DamageAmount;
 }

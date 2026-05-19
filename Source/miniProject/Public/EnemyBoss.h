@@ -50,6 +50,12 @@ public:
 	UPROPERTY()
 	class UMaterialInstanceDynamic* matWest;
 	
+	//회전 차지공격 구현을 위한 변수
+	bool bChargeDirectionMode = false;
+	FTimerHandle testHandle;
+	float currentRadius = 0.0f;
+	float nextRadius = 15.0f;
+	
 	// 차징 상태 여부
 	bool bIsCharging = false;
 
@@ -80,5 +86,24 @@ public:
 	// 플레이어 참조
 	class APawn* player;
 	
+	
+	
+	//투사체 발사를 위한 변수
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class ABulletEnemyBasic> bossBulletClass;
+	class ABulletEnemyBasic* bossBulletInstance;
+	UPROPERTY(EditAnywhere)
+	class UArrowComponent* firePosition; 
+	
+	void StartProjectileBossPattern();
+	void EndProjectilePattern();
+	void FireProjectile();
+	bool bIsProjectilePattern = false;
+	FTimerHandle projectileHandle;
+	
+	float currentProjectileRadius = 0.0f;
+	UPROPERTY(EditAnywhere)
+	float increaseProjectileRadius = 3.0f;
+	float maxProjectileRadius = 180.0f;
 	// --- --- --- --- --- --- --- --- --- ---
 };

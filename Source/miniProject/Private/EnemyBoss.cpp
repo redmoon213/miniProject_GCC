@@ -3,12 +3,14 @@
 
 #include "EnemyBoss.h"
 
+#include "BulletEnemyBasic.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "DrawDebugHelpers.h" // 추가: 판정 범위 시각화를 위해 필요
+#include "Components/ArrowComponent.h"
 
 
 // Sets default values
@@ -63,6 +65,11 @@ AEnemyBoss::AEnemyBoss()
 	decalWest->DecalSize = FVector(500.0f, maxDecalLength, decalWidth);
 	decalWest->SetRelativeLocation(FVector(0.0f, -maxDecalLength / 2.0f, 0.0f));
 	decalWest->SetRelativeRotation(FRotator(-90.0f, 0.0f, 180.0f));
+	
+	//투사체 발사를 위한 변수 초기화
+	firePosition = CreateDefaultSubobject<UArrowComponent>(TEXT("FirePosition"));
+	firePosition->SetupAttachment(boxComp);
+	
 }
 
 // Called when the game starts or when spawned
@@ -85,9 +92,12 @@ void AEnemyBoss::BeginPlay()
 	CreateMaterial(decalEast, matEast);
 	CreateMaterial(decalWest, matWest);
 
-	//decalGroup->SetRelativeRotation(FRotator(0.0f, -45.0f, 0.0f));
+	//
 	// 테스트용: 시작 시 차징 시작
-	StartCrossCharge();
+	GetWorld()->GetTimerManager().SetTimer(testHandle, this ,&AEnemyBoss::StartCrossCharge, 1.5f, true);
+	
+	StartProjectileBossPattern();
+
 }
 
 // Called every frame
@@ -105,7 +115,22 @@ void AEnemyBoss::StartCrossCharge()
 {
 	currentChargeTime = 0.0f;
 	bIsCharging = true;
-
+	
+	
+	currentRadius += nextRadius;
+	decalGroup->SetRelativeRotation(FRotator(0.0f, currentRadius, 0.0f));
+	
+	/*if (bChargeDirectionMode)
+	{
+	decalGroup->SetRelativeRotation(FRotator(0.0f, -45.0f, 0.0f));
+		bChargeDirectionMode = false;
+	}
+	else
+	{
+		decalGroup->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+		bChargeDirectionMode = true;
+	}*/
+	
 	if (decalNorth) decalNorth->SetHiddenInGame(false);
 	if (decalSouth) decalSouth->SetHiddenInGame(false);
 	if (decalEast) decalEast->SetHiddenInGame(false);
@@ -217,4 +242,47 @@ void AEnemyBoss::ExecuteCrossCharge()
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("보스: 십자 공격 발동 완료!"));
+}
+
+
+void AEnemyBoss::StartProjectileBossPattern()
+{
+	//FireProjectile();
+	bIsProjectilePattern = true;
+	//FireProjectile();
+
+	GetWorld()->GetTimerManager().SetTimer(projectileHandle, this, &AEnemyBoss::FireProjectile, 0.1f, true);
+}
+
+void AEnemyBoss::FireProjectile()
+{
+	
+	
+	if (bIsProjectilePattern)
+	{
+		if (currentProjectileRadius >= maxProjectileRadius)
+		{
+			EndProjectilePattern();
+		}
+		
+		
+		FRotator fowardDir = firePosition->GetComponentRotation() + FRotator(0.0f, currentProjectileRadius, 0.0f);
+		FRotator backwardDir = firePosition->GetComponentRotation() - FRotator(0.0f, 180.0f -currentProjectileRadius , 0.0f);
+		bossBulletInstance = GetWorld()->SpawnActor<ABulletEnemyBasic>(bossBulletClass, firePosition->GetComponentLocation(),
+			fowardDir);
+	
+	
+		bossBulletInstance = GetWorld()->SpawnActor<ABulletEnemyBasic>(bossBulletClass, firePosition->GetComponentLocation(),
+			backwardDir);
+		
+		currentProjectileRadius += increaseProjectileRadius;
+	}	
+	
+}
+
+void AEnemyBoss::EndProjectilePattern()
+{
+	GetWorld()->GetTimerManager().ClearTimer(projectileHandle);
+	bIsProjectilePattern = false;
+	currentProjectileRadius = 0.0f;
 }

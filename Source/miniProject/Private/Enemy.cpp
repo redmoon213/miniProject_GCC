@@ -7,6 +7,8 @@
 #include "DroppedAmmo.h"
 #include "EnemyIndicatorWidget.h"
 #include "EngineUtils.h"
+#include "MyGameModeBase.h"
+#include "MyPlayerController.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/ArrowComponent.h"
 #include "Components/BoxComponent.h"
@@ -363,8 +365,12 @@ void AEnemy::Die()
 	GetWorld()->SpawnActor<AActor>(debrisClass, GetActorLocation(), GetActorRotation());
 	
 	GetWorld()->SpawnActor<ADroppedAmmo>(droppedAmmoClass, GetActorLocation(), GetActorRotation());
+	AMyGameModeBase* gameMode = Cast<AMyGameModeBase>(GetWorld()->GetAuthGameMode());
 	
-	
+	if (gameMode)
+	{
+		gameMode->OnEnemyDie();
+	}
 	
 	Destroy();
 }

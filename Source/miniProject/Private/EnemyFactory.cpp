@@ -64,7 +64,6 @@ bool AEnemyFactory::GetValidSpawnLocation(FVector& outLocation)
 	
 		}
 	}
-	UE_LOG(LogTemp, Warning, TEXT("test>>>"));
 	outLocation = playerLocation + FVector(1000.0f, 0.0f, 0.0f);
 	return true;
 }
@@ -93,6 +92,7 @@ void AEnemyFactory::SpawnSingleEnemy()
 		FActorSpawnParameters spawnParams;
 		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 		//GetWorld()->SpawnActor<AEnemy>(enemy, spawnLocation, FRotator::ZeroRotator, spawnParams);
+		spawnLocation.Z = 0;
 		GetWorld()->SpawnActor<AEnemySpawnIndicator>(spawnIndicator, spawnLocation, FRotator::ZeroRotator, spawnParams);
 		enemiesSpawnLeft--;
 	}

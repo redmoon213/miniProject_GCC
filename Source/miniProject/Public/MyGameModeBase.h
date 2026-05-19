@@ -13,4 +13,22 @@ UCLASS()
 class MINIPROJECT_API AMyGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+public:
+	
+	UPROPERTY(EditAnywhere)
+	int32 enemyCount = 5;
+	
+	void OnEnemyDie();
+	
+	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemyBoss> bossClass;
+	
+	FTimerHandle bossSpawnTimerHandle;
+	
+	class AMyPlayerController* pc;
+	
+	void StartBossSpawn();
+	void SpawnBoss();
+	
 };

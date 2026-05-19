@@ -8,6 +8,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "DrawDebugHelpers.h" // 추가: 판정 범위 시각화를 위해 필요
 
 
 // Sets default values
@@ -84,6 +85,7 @@ void AEnemyBoss::BeginPlay()
 	CreateMaterial(decalEast, matEast);
 	CreateMaterial(decalWest, matWest);
 
+	//decalGroup->SetRelativeRotation(FRotator(0.0f, -45.0f, 0.0f));
 	// 테스트용: 시작 시 차징 시작
 	StartCrossCharge();
 }
@@ -157,7 +159,7 @@ void AEnemyBoss::ExecuteCrossCharge()
 			FRotator overlapRotation = decal->GetComponentRotation();
 			
 			// DecalSize를 기반으로 판정 범위 계산 (Extent는 절반값)
-			FVector boxExtent = FVector(decal->DecalSize.Z / 2.0f, decal->DecalSize.Y / 2.0f, 100.0f);
+			FVector boxExtent = (decal->DecalSize * decal->GetComponentScale()) / 2.0f;
 
 			TArray<AActor*> overlappedActors;
 			
@@ -166,18 +168,7 @@ void AEnemyBoss::ExecuteCrossCharge()
 			TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
 			objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel1));
 
-			// 수정 전 코드 (모든 오브젝트 체크 방식)
-			/*
-			UKismetSystemLibrary::BoxOverlapActors(
-				GetWorld(),
-				overlapLocation,
-				boxExtent,
-				TArray<TEnumAsByte<EObjectTypeQuery>>(),
-				nullptr,
-				ignoreActors,
-				overlappedActors
-			);
-			*/
+			
 
 			// 전용 채널 필터를 적용하여 정확한 오버랩 체크 수행
 			UKismetSystemLibrary::BoxOverlapActors(
@@ -189,7 +180,20 @@ void AEnemyBoss::ExecuteCrossCharge()
 				ignoreActors,
 				overlappedActors
 			);
-			// -------------------------------------------------------------
+			
+			/*// --- 판정 범위 시각화 (Debug Box) ---
+			DrawDebugBox(
+				GetWorld(),
+				overlapLocation,
+				boxExtent,
+				overlapRotation.Quaternion(),
+				FColor::Red,
+				false,
+				2.0f, // 2초 동안 표시
+				0,
+				2.0f
+			);
+			// ------------------------------------*/
 
 			for (AActor* actor : overlappedActors)
 			{
@@ -207,7 +211,7 @@ void AEnemyBoss::ExecuteCrossCharge()
 			// UGameplayStatics::ApplyDamage(hitActor, 1.0f, GetController(), this, nullptr);
 
 			// AActor 상속 시 GetController()가 없으므로 nullptr 전달
-			UGameplayStatics::ApplyDamage(hitActor, 10.0f, nullptr, this, nullptr);
+			UGameplayStatics::ApplyDamage(hitActor, 1.0f, nullptr, this, nullptr);
 			UE_LOG(LogTemp, Warning, TEXT("보스: 십자 공격 플레이어 적중!"));
 		}
 	}

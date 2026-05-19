@@ -27,8 +27,12 @@ public:
 	FTimerHandle bossSpawnTimerHandle;
 	
 	class AMyPlayerController* pc;
-	
+	class AEnemyFactory* eFactory;
 	void StartBossSpawn();
 	void SpawnBoss();
 	
+	void ReturnCameraToPlayer();
+	
+protected:
+	virtual void BeginPlay() override;
 };

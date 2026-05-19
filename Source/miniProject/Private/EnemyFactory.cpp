@@ -4,6 +4,7 @@
 #include "EnemyFactory.h"
 
 #include "Enemy.h"
+#include "EnemyBoss.h"
 #include "EnemySpawnIndicator.h"
 #include "NavigationSystem.h"
 #include "Kismet/GameplayStatics.h"
@@ -21,7 +22,7 @@ void AEnemyFactory::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	SpawnStart(5);
+	//SpawnStart(5);
 	
 }
 
@@ -98,4 +99,11 @@ void AEnemyFactory::SpawnSingleEnemy()
 	}
 	
 	
+}
+
+void AEnemyFactory::SpawnEnemyBoss()
+{
+	FVector spawnLocation = GetActorLocation();
+	spawnLocation.Z = 0;
+	GetWorld()->SpawnActor<AEnemyBoss>(enemyBoss, spawnLocation, FRotator::ZeroRotator);
 }

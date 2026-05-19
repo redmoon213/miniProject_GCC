@@ -26,6 +26,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AEnemy> enemy;
 	UPROPERTY(EditAnywhere)
+	TSubclassOf<class AEnemyBoss> enemyBoss;
+	
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AEnemySpawnIndicator> spawnIndicator;
 	
 	float minSpawnDistance = 300.0f;
@@ -42,7 +45,7 @@ public:
 	
 	void SpawnSingleEnemy();
 	
-	
+	void SpawnEnemyBoss();
 	
 	float spawnTimer = 2.0f;
 	

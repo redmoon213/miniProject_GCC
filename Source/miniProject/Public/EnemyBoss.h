@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -85,6 +85,7 @@ public:
 
 	// 플레이어 참조
 	class APawn* player;
+
 	
 	
 	
@@ -106,4 +107,18 @@ public:
 	float increaseProjectileRadius = 3.0f;
 	float maxProjectileRadius = 180.0f;
 	// --- --- --- --- --- --- --- --- --- ---
+	
+	//보스의 이동 구현
+	UPROPERTY(EditAnywhere, Category = "Boss|Movement");
+	float moveSpeed = 300.0f;
+	UPROPERTY(EditAnywhere, Category = "Boss|Movement")
+	float hopHeight = 150.0f;
+	bool bIsMoving = false;
+	float hopAlpha = 0.0f;
+	float baseZ = 0.0f;
+	UPROPERTY(EditAnywhere, Category = "Boss|Movement")
+	float hopDuration = 1.0f;
+	
+	void MoveStart();
+	void MoveForward(float DeltaTime);
 };

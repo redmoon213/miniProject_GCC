@@ -93,10 +93,14 @@ void AEnemyBoss::BeginPlay()
 	CreateMaterial(decalWest, matWest);
 
 	//
-	// 테스트용: 시작 시 차징 시작
+	baseZ = GetActorLocation().Z;
+	//// 테스트용: 시작 시 차징 시작
 	GetWorld()->GetTimerManager().SetTimer(testHandle, this ,&AEnemyBoss::StartCrossCharge, 1.5f, true);
 	
 	StartProjectileBossPattern();
+	MoveStart();
+	
+	
 
 }
 
@@ -109,6 +113,8 @@ void AEnemyBoss::Tick(float DeltaTime)
 	{
 		UpdateCrossCharge(DeltaTime);
 	}
+	
+	MoveForward(DeltaTime);
 }
 
 void AEnemyBoss::StartCrossCharge()
@@ -206,19 +212,7 @@ void AEnemyBoss::ExecuteCrossCharge()
 				overlappedActors
 			);
 			
-			/*// --- 판정 범위 시각화 (Debug Box) ---
-			DrawDebugBox(
-				GetWorld(),
-				overlapLocation,
-				boxExtent,
-				overlapRotation.Quaternion(),
-				FColor::Red,
-				false,
-				2.0f, // 2초 동안 표시
-				0,
-				2.0f
-			);
-			// ------------------------------------*/
+			
 
 			for (AActor* actor : overlappedActors)
 			{
@@ -232,10 +226,7 @@ void AEnemyBoss::ExecuteCrossCharge()
 	{
 		if (hitActor && hitActor == player)
 		{
-			// 수정 전 코드
-			// UGameplayStatics::ApplyDamage(hitActor, 1.0f, GetController(), this, nullptr);
-
-			// AActor 상속 시 GetController()가 없으므로 nullptr 전달
+			
 			UGameplayStatics::ApplyDamage(hitActor, 1.0f, nullptr, this, nullptr);
 			UE_LOG(LogTemp, Warning, TEXT("보스: 십자 공격 플레이어 적중!"));
 		}
@@ -247,10 +238,8 @@ void AEnemyBoss::ExecuteCrossCharge()
 
 void AEnemyBoss::StartProjectileBossPattern()
 {
-	//FireProjectile();
+	
 	bIsProjectilePattern = true;
-	//FireProjectile();
-
 	GetWorld()->GetTimerManager().SetTimer(projectileHandle, this, &AEnemyBoss::FireProjectile, 0.1f, true);
 }
 
@@ -268,11 +257,11 @@ void AEnemyBoss::FireProjectile()
 		
 		FRotator fowardDir = firePosition->GetComponentRotation() + FRotator(0.0f, currentProjectileRadius, 0.0f);
 		FRotator backwardDir = firePosition->GetComponentRotation() - FRotator(0.0f, 180.0f -currentProjectileRadius , 0.0f);
-		bossBulletInstance = GetWorld()->SpawnActor<ABulletEnemyBasic>(bossBulletClass, firePosition->GetComponentLocation(),
+		bossBulletInstance = GetWorld()->SpawnActor<ABulletEnemyBasic>(bossBulletClass, firePosition->GetComponentLocation() + FVector(0.0f, 0.0f, -10.0f),
 			fowardDir);
 	
 	
-		bossBulletInstance = GetWorld()->SpawnActor<ABulletEnemyBasic>(bossBulletClass, firePosition->GetComponentLocation(),
+		bossBulletInstance = GetWorld()->SpawnActor<ABulletEnemyBasic>(bossBulletClass, firePosition->GetComponentLocation()+ FVector(0.0f, 0.0f, -10.0f),
 			backwardDir);
 		
 		currentProjectileRadius += increaseProjectileRadius;
@@ -285,4 +274,39 @@ void AEnemyBoss::EndProjectilePattern()
 	GetWorld()->GetTimerManager().ClearTimer(projectileHandle);
 	bIsProjectilePattern = false;
 	currentProjectileRadius = 0.0f;
+}
+
+void AEnemyBoss::MoveStart()
+{
+	if (!bIsMoving)
+	{
+		bIsMoving = true;
+		hopAlpha = 0.0f;
+	}
+}
+
+void AEnemyBoss::MoveForward(float DeltaTime)
+{
+	if (!bIsMoving)
+	{
+		return;
+	}
+	
+	hopAlpha += DeltaTime / hopDuration;
+	
+	float sinValue = FMath::Sin(hopAlpha*PI);
+	float currentHop = sinValue * hopHeight;
+	
+	FVector newLocation = GetActorLocation() + (GetActorForwardVector() * moveSpeed * DeltaTime);
+	newLocation.Z = baseZ + currentHop;
+	SetActorLocation(newLocation);
+	
+	if (hopAlpha >= 1.0f)
+	{
+		bIsMoving = false;
+		FVector finalloc = GetActorLocation();
+		finalloc.Z = baseZ;
+		SetActorLocation(finalloc);
+	}
+	
 }

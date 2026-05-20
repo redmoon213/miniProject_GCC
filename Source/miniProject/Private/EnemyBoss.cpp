@@ -104,11 +104,7 @@ void AEnemyBoss::BeginPlay()
 
 	//
 	baseZ = GetActorLocation().Z;
-	//// 테스트용: 시작 시 차징 시작
-	GetWorld()->GetTimerManager().SetTimer(testHandle, this ,&AEnemyBoss::StartCrossCharge, 2.0f, true);
 	
-	StartProjectileBossPattern();
-	MoveStart();
 	
 	
 
@@ -124,9 +120,29 @@ void AEnemyBoss::Tick(float DeltaTime)
 		UpdateCrossCharge(DeltaTime);
 	}
 	
-	MoveStart();
-	SearchPlayer(DeltaTime);
-	MoveForward(DeltaTime);
+	if (bIsMoving)
+	{
+		MoveForward(DeltaTime);
+	}
+	
+	if (bCanRotate)
+	{
+		SearchPlayer(DeltaTime);
+	}
+	
+	if (bIsShaking)
+	{
+		UpdateShaking(DeltaTime);
+	}
+	
+	if (bIsJumping)
+	{
+		
+		UpdateJumpAttack(DeltaTime);
+	}
+	
+	ChoosePattern();
+	
 }
 
 void AEnemyBoss::StartCrossCharge()
@@ -244,7 +260,7 @@ void AEnemyBoss::ExecuteCrossCharge()
 		}
 	}
 
-	bCanRotate = true;
+	EndPattern();
 }
 
 
@@ -284,8 +300,8 @@ void AEnemyBoss::FireProjectile()
 void AEnemyBoss::EndProjectilePattern()
 {
 	GetWorld()->GetTimerManager().ClearTimer(projectileHandle);
-	bIsProjectilePattern = false;
 	currentProjectileRadius = 0.0f;
+	EndPattern();
 }
 
 void AEnemyBoss::MoveStart()
@@ -294,16 +310,13 @@ void AEnemyBoss::MoveStart()
 	{
 		bIsMoving = true;
 		hopAlpha = 0.0f;
-		bCanRotate = false;
+		//bCanRotate = false;
 	}
 }
 
 void AEnemyBoss::MoveForward(float DeltaTime)
 {
-	if (!bIsMoving)
-	{
-		return;
-	}
+	
 	
 	hopAlpha += DeltaTime / hopDuration;
 	
@@ -316,21 +329,19 @@ void AEnemyBoss::MoveForward(float DeltaTime)
 	
 	if (hopAlpha >= 1.0f)
 	{
-		bIsMoving = false;
+		
 		FVector finalloc = GetActorLocation();
 		finalloc.Z = baseZ;
 		SetActorLocation(finalloc);
-		bCanRotate = true;
+		
+		EndPattern();
 	}
 	
 }
 
 void AEnemyBoss::SearchPlayer(float DeltaTime)
 {
-	/*if (!bCanRotate)
-	{
-		return;
-	}*/
+	
 	FVector dir = player->GetActorLocation() - GetActorLocation();
 	dir.Z = 0.0f;
 	dir.Normalize();
@@ -368,4 +379,110 @@ void AEnemyBoss::OnOverlapToPlayer(UPrimitiveComponent* OverlappedComponent, AAc
 	{
 		UGameplayStatics::ApplyDamage(player, 1.0f, nullptr, this, nullptr);
 	}
+}
+
+
+void AEnemyBoss::StartJumpAttack()
+{
+	bIsShaking = true;
+	currentShakeTime = 0.0f;
+	
+	bCanRotate = false;
+	
+	return;
+}
+
+void AEnemyBoss::ExecuteJumpAttack()
+{
+	if (!player)
+	{
+		return ;
+	}
+	bCanRotate = false;
+	bIsJumping = true;
+	jumpAlpha = 0.0f;
+	jumpStartLocation = GetActorLocation();
+	jumpTargetLocation = player->GetActorLocation();
+	jumpTargetLocation.Z = baseZ;
+	return;
+}
+
+void AEnemyBoss::UpdateJumpAttack(float DeltaTime)
+{
+	jumpAlpha += DeltaTime / jumpDurtation;
+		
+	FVector currentXY = FMath::Lerp(jumpStartLocation, jumpTargetLocation, jumpAlpha);
+		
+	float sinValue = FMath::Sin(jumpAlpha * PI);
+	float currentZOffset = sinValue*jumpheigth;
+	FVector newLocation = currentXY;
+	newLocation.Z += currentZOffset;
+	SetActorLocation(newLocation);
+		
+	if (jumpAlpha >= 1.0f)
+	{
+		
+		SetActorLocation(jumpTargetLocation);
+		
+		EndPattern();
+	}
+}
+
+void AEnemyBoss::UpdateShaking(float DeltaTime)
+{
+	currentShakeTime += DeltaTime;
+		
+	float sineValue = FMath::Sin(GetWorld()->GetTimeSeconds() * shakeSpeed);
+	meshComp->SetRelativeRotation(FRotator(0, sineValue*shakeIntensity, 0));
+		
+	if (currentShakeTime >= shakeDuration)
+	{
+		bIsShaking = false;
+		meshComp->SetRelativeRotation(FRotator::ZeroRotator);
+			
+		ExecuteJumpAttack();
+	}
+}
+
+void AEnemyBoss::ChoosePattern()
+{
+	if (CurrentPattern != EBossPattern::Idle)
+	{
+		return;
+	}
+	int32 randomIdx = FMath::RandRange(1, static_cast<int32>(EBossPattern::MAX) - 1);
+	
+	EBossPattern selectedPattern = static_cast<EBossPattern>(randomIdx);
+	
+	switch (selectedPattern)
+	{
+	case EBossPattern::Projectile:
+		StartProjectileBossPattern();
+		break;
+	case EBossPattern::Charging:
+		StartCrossCharge();
+		break;
+	case EBossPattern::JumpAttack:
+		StartJumpAttack();
+		break;
+	case EBossPattern::Moving:
+		MoveStart();
+		break;
+	default:
+		break;
+	}
+	CurrentPattern = selectedPattern;
+}
+
+void AEnemyBoss::EndPattern()
+{
+	CurrentPattern = EBossPattern::Idle;
+	bIsShaking = false;
+	bIsCharging = false;
+	bIsJumping = false;
+	bIsMoving = false;
+	bIsProjectilePattern = false;
+	bCanRotate = true;
+	
+	GetWorldTimerManager().SetTimer(bossPatternHandle, this, &AEnemyBoss::ChoosePattern, patternInterval, false);
 }

@@ -7,12 +7,14 @@
 #include "EnemyBoss.generated.h"
 
 UENUM(BlueprintType)
-enum class EBoosState : uint8
+enum class EBossPattern : uint8
 {
 	Idle,
-	Moving,
+	Projectile,
 	Charging,
-	Attacking
+	JumpAttack,
+	Moving,
+	MAX
 };
 
 
@@ -144,7 +146,7 @@ public:
 	
 	//보스의 패턴을 결정하기 위한 변수와 함수
 	FTimerHandle bossPatternHandle;
-	void ChoosePattern();
+	
 	void ResetHitFlash();
 	
 	//
@@ -157,4 +159,36 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UMaterialInstanceDynamic* hitFlashDynamicMaterial;
 	//
+	
+	//플레이어를 타겟으로 한 점프 공격 변수 및 함수
+	void StartJumpAttack();
+	void ExecuteJumpAttack();
+	void UpdateJumpAttack(float DeltaTime);
+	void UpdateShaking(float DeltaTime);
+	bool bIsShaking = false;
+	float currentShakeTime = 0.0f;
+	
+	UPROPERTY(EditAnywhere, Category="Boss|Attack")
+	float shakeDuration = 0.6f;
+	UPROPERTY(EditAnywhere, Category="Boss|Attack")
+	float shakeIntensity = 4.0f;
+	UPROPERTY(EditAnywhere, Category="Boss|Attack")
+	float shakeSpeed = 75.0f;
+	
+	bool bIsJumping = false;
+	FVector jumpStartLocation;
+	FVector jumpTargetLocation;
+	float jumpAlpha = 0.0f;
+	
+	UPROPERTY(EditAnywhere, Category="Boss|Attack")
+	float jumpDurtation = 1.0f;
+	UPROPERTY(EditAnywhere, Category="Boss|Attack")
+	float jumpheigth = 400.0f;
+	
+	// 보스 패턴 결정을 위한 변수와 함수
+	UPROPERTY(EditAnywhere, Category="Boss|Pateern")
+	float patternInterval = 2.0f;
+	void ChoosePattern();
+	void EndPattern();
+	EBossPattern CurrentPattern = EBossPattern::Idle;
 };

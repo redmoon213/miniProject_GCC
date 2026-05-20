@@ -309,7 +309,7 @@ void AEnemyBoss::ExecuteCrossCharge()
 
 void AEnemyBoss::StartProjectileBossPattern()
 {
-	
+	bCanRotate = false;
 	bIsProjectilePattern = true;
 	GetWorld()->GetTimerManager().SetTimer(projectileHandle, this, &AEnemyBoss::FireProjectile, 0.1f, true);
 }
@@ -396,6 +396,11 @@ void AEnemyBoss::SearchPlayer(float DeltaTime)
 
 float AEnemyBoss::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
+	if (DamageCauser&&DamageCauser->ActorHasTag((FName("Debris"))))
+	{
+		return 0.0f;
+	}
+	
 	currentHp -= FMath::RoundToInt(DamageAmount);
 	
 	hitFlashDynamicMaterial->SetScalarParameterValue("HitFlash", 1.0f);

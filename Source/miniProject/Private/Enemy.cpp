@@ -85,8 +85,8 @@ void AEnemy::BeginPlay()
 	////////
 	
 	//생성된 주사위가 어떤 행동을 할지 결정?
-	//attackMode = FMath::RandRange(1,3);
-	attackMode = 1;
+	attackMode = FMath::RandRange(1,3);
+	
 	
 	if (attackMode <1 || attackMode>3 )
 	{
@@ -155,24 +155,6 @@ void AEnemy::UpdateDiceEye()
 	}
 }
 
-void AEnemy::diceTakeDamage()
-{
-	if (currentDiceEye == 1)
-	{
-		Die();
-	}
-	
-	else
-	{
-		dynamicMaterial->SetScalarParameterValue("HitFlash", 1.0f);
-		currentDiceEye --;
-		UpdateDiceEye();
-	}
-	
-	GetWorld()->GetTimerManager().SetTimer(hitFlashTimer, this, &AEnemy::ResetHitFlash, 0.1f, false);
-	
-	
-}
 
 void AEnemy::ResetHitFlash()
 {
@@ -377,7 +359,11 @@ void AEnemy::Die()
 
 float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-		
+	if (DamageCauser&&DamageCauser->ActorHasTag((FName("Debris"))))
+	{
+		return 0.0f;
+	}
+	
 	if (currentDiceEye == 1)
 	{
 		Die();

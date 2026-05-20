@@ -11,6 +11,7 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "DrawDebugHelpers.h" // 추가: 판정 범위 시각화를 위해 필요
 #include "Components/ArrowComponent.h"
+#include "Engine/OverlapResult.h"
 
 
 // Sets default values
@@ -107,6 +108,7 @@ void AEnemyBoss::BeginPlay()
 	
 	
 	
+	ChoosePattern();
 
 }
 
@@ -141,7 +143,6 @@ void AEnemyBoss::Tick(float DeltaTime)
 		UpdateJumpAttack(DeltaTime);
 	}
 	
-	ChoosePattern();
 	
 }
 
@@ -150,9 +151,12 @@ void AEnemyBoss::StartCrossCharge()
 	currentChargeTime = 0.0f;
 	bIsCharging = true;
 	bCanRotate = false;
+	currentDoubleChargeCount = 0;
 	
-	currentRadius += nextRadius;
-	decalGroup->SetRelativeRotation(FRotator(0.0f, currentRadius, 0.0f));
+	//currentRadius += nextRadius;
+	//decalGroup->SetRelativeRotation(FRotator(0.0f, currentRadius, 0.0f));
+	
+	decalGroup->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	
 	/*if (bChargeDirectionMode)
 	{
@@ -195,7 +199,7 @@ void AEnemyBoss::UpdateCrossCharge(float DeltaTime)
 void AEnemyBoss::ExecuteCrossCharge()
 {
 	bIsCharging = false;
-
+	
 	// 데칼 숨김 처리
 	if (decalNorth) decalNorth->SetHiddenInGame(true);
 	if (decalSouth) decalSouth->SetHiddenInGame(true);
@@ -217,19 +221,33 @@ void AEnemyBoss::ExecuteCrossCharge()
 			FVector overlapLocation = decal->GetComponentLocation();
 			FRotator overlapRotation = decal->GetComponentRotation();
 			
-			// DecalSize를 기반으로 판정 범위 계산 (Extent는 절반값)
-			FVector boxExtent = (decal->DecalSize * decal->GetComponentScale()) / 2.0f;
-
+			
+			FVector decalSize = decal->DecalSize;
+			FVector scale = decal->GetComponentScale();
+			FVector boxExtent;
+			boxExtent.X = (decalSize.X * scale.X) / 2.0f;
+			boxExtent.Y = (decalSize.Y * scale.Y) / 2.0f;
+			boxExtent.Z = (decalSize.Z * scale.Z) / 2.0f;
+			
 			TArray<AActor*> overlappedActors;
 			
 			// --- 전용 트레이스 채널(EnemyChargeAttack)을 이용한 판정 로직 ---
 			// 에디터에서 첫 번째로 추가한 트레이스 채널은 보통 ECC_GameTraceChannel1에 해당합니다.
 			TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
+			TArray<FOverlapResult> overlapResults;
+			FCollisionObjectQueryParams objectParams;
 			objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel1));
-
+			
+			bool bHit = GetWorld()->OverlapMultiByObjectType(
+				overlapResults,
+				overlapLocation,
+				overlapRotation.Quaternion(),
+				objectParams,
+				FCollisionShape::MakeBox(boxExtent)
+				);
 			
 
-			// 전용 채널 필터를 적용하여 정확한 오버랩 체크 수행
+			/*// 전용 채널 필터를 적용하여 정확한 오버랩 체크 수행
 			UKismetSystemLibrary::BoxOverlapActors(
 				GetWorld(),
 				overlapLocation,
@@ -238,14 +256,25 @@ void AEnemyBoss::ExecuteCrossCharge()
 				nullptr,
 				ignoreActors,
 				overlappedActors
-			);
+			);*/
 			
 			
-
+			/*
 			for (AActor* actor : overlappedActors)
 			{
 				totalHitActors.AddUnique(actor);
+			}*/
+			for (const FOverlapResult& result : overlapResults)
+			{
+				AActor* hitActor = result.GetActor();
+				if (hitActor && hitActor != this)
+				{
+					totalHitActors.AddUnique(hitActor);
+				}
 			}
+			
+			//DrawDebugBox(GetWorld(), overlapLocation, boxExtent, overlapRotation.Quaternion(), FColor::Red, false, 1.0f, 0, 5.0f);
+
 		}
 	}	
 
@@ -259,8 +288,22 @@ void AEnemyBoss::ExecuteCrossCharge()
 			UE_LOG(LogTemp, Warning, TEXT("보스: 십자 공격 플레이어 적중!"));
 		}
 	}
-
-	EndPattern();
+	
+	currentDoubleChargeCount++;
+	if (currentDoubleChargeCount < maxDoubleChargeCount)
+	{
+		currentChargeTime = 0.0f;
+		bIsCharging = true;
+		decalGroup->SetRelativeRotation(FRotator(0.0f, 45.0f, 0.0f));
+		if (decalNorth) decalNorth->SetHiddenInGame(false);
+		if (decalSouth) decalSouth->SetHiddenInGame(false);
+		if (decalEast) decalEast->SetHiddenInGame(false);
+		if (decalWest) decalWest->SetHiddenInGame(false);
+	}
+	else
+	{
+		EndPattern();
+	}
 }
 
 
@@ -317,7 +360,6 @@ void AEnemyBoss::MoveStart()
 void AEnemyBoss::MoveForward(float DeltaTime)
 {
 	
-	
 	hopAlpha += DeltaTime / hopDuration;
 	
 	float sinValue = FMath::Sin(hopAlpha*PI);
@@ -329,7 +371,6 @@ void AEnemyBoss::MoveForward(float DeltaTime)
 	
 	if (hopAlpha >= 1.0f)
 	{
-		
 		FVector finalloc = GetActorLocation();
 		finalloc.Z = baseZ;
 		SetActorLocation(finalloc);
@@ -471,8 +512,10 @@ void AEnemyBoss::ChoosePattern()
 	default:
 		break;
 	}
+	
 	CurrentPattern = selectedPattern;
 }
+
 
 void AEnemyBoss::EndPattern()
 {
@@ -486,3 +529,4 @@ void AEnemyBoss::EndPattern()
 	
 	GetWorldTimerManager().SetTimer(bossPatternHandle, this, &AEnemyBoss::ChoosePattern, patternInterval, false);
 }
+

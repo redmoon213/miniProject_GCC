@@ -66,7 +66,7 @@ public:
 	bool bChargeDirectionMode = false;
 	FTimerHandle testHandle;
 	float currentRadius = 0.0f;
-	float nextRadius = 15.0f;
+	float nextRadius = 45.0f;
 	
 	// 차징 상태 여부
 	bool bIsCharging = false;
@@ -187,8 +187,13 @@ public:
 	
 	// 보스 패턴 결정을 위한 변수와 함수
 	UPROPERTY(EditAnywhere, Category="Boss|Pateern")
-	float patternInterval = 2.0f;
+	float patternInterval = 1.0f;
 	void ChoosePattern();
 	void EndPattern();
 	EBossPattern CurrentPattern = EBossPattern::Idle;
+	
+	//십자 차징 두번하게
+	int32 currentDoubleChargeCount = 0;
+	UPROPERTY(EditAnywhere)
+	int32 maxDoubleChargeCount = 2;
 };

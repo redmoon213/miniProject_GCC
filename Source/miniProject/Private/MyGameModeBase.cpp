@@ -6,16 +6,36 @@
 #include "EnemyBoss.h"
 #include "EnemyFactory.h"
 #include "MyPlayerController.h"
+#include "Portal.h"
+#include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 void AMyGameModeBase::BeginPlay()
 {
 	eFactory = Cast<AEnemyFactory>(UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyFactory::StaticClass()));
 	pc = Cast<AMyPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-	if (eFactory)
+	
+	FString currentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
+	
+	
+	if (currentLevelName == "BossFight")
 	{
-		eFactory->SpawnStart(enemyCount);
+		if (eFactory)
+		{
+			eFactory->bossSpawnDecal->SetHiddenInGame(false);
+			StartBossSpawn();
+			
+		}
 	}
+	
+	else
+	{
+		if (eFactory)
+		{
+			eFactory->SpawnStart(enemyCount);
+		}
+	}
+	
 }
 
 
@@ -24,8 +44,16 @@ void AMyGameModeBase::OnEnemyDie()
 	enemyCount--;
 	if (enemyCount <= 0 )
 	{
-		
-		StartBossSpawn();
+		AActor* foundActor = UGameplayStatics::GetActorOfClass(GetWorld(), APortal::StaticClass());
+		APortal* portal = Cast<APortal>(foundActor);
+		if (portal)
+		{
+			portal->ShowPortal();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Can't Found Portal"));
+		}
 	}
 }
 

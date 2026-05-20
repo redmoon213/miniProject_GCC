@@ -7,6 +7,7 @@
 #include "EnemyBoss.h"
 #include "EnemySpawnIndicator.h"
 #include "NavigationSystem.h"
+#include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -15,6 +16,12 @@ AEnemyFactory::AEnemyFactory()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	sceneComp = CreateDefaultSubobject<USceneComponent>("SceneComponent");
+	SetRootComponent(sceneComp);
+	bossSpawnDecal = CreateDefaultSubobject<UDecalComponent>(TEXT("BossSpawnDecal"));
+	bossSpawnDecal->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
+	bossSpawnDecal->SetupAttachment(sceneComp);
 }
 
 // Called when the game starts or when spawned
@@ -22,7 +29,10 @@ void AEnemyFactory::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//SpawnStart(5);
+	if (bossSpawnDecal)
+	{
+		bossSpawnDecal->SetHiddenInGame(true);
+	}
 	
 }
 

@@ -10,6 +10,7 @@
 
 void UPortalIndicator::NativeConstruct()
 {
+	Super::NativeConstruct();
 	cachedPC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	
 }
@@ -34,7 +35,6 @@ void UPortalIndicator::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
     
 	FVector2D screenPos;
 	
-	
 	// 3. 화면 안에 있는지 체크 (픽셀 기준)
 	bool bProjected = cachedPC->ProjectWorldLocationToScreen(targetActor->GetActorLocation(), screenPos);
 	if (bProjected && 
@@ -47,7 +47,7 @@ void UPortalIndicator::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
 	}
 	
 	// 4. 화면 밖일 때 표시
-	SetRenderOpacity(1.0f);
+	//SetRenderOpacity(1.0f);
 	
 	// 5. 방향 계산 (픽셀 - 픽셀 이므로 완벽하게 작동!)
 	FVector2D dir = screenPos - screenCenter;
@@ -83,6 +83,8 @@ void UPortalIndicator::NativeTick(const FGeometry& MyGeometry, float InDeltaTime
     
 	// ★ 보너스 핵심: 위젯의 중심점(Pivot)을 정중앙(0.5, 0.5)으로 맞춰야 테두리에 예쁘게 걸칩니다.
 	SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
+	
+	UE_LOG(LogTemp, Warning, TEXT("24312"));
 }
 
 

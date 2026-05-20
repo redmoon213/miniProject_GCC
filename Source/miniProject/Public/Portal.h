@@ -30,5 +30,17 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UDecalComponent* decalComp;
 	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UPortalIndicator> indicatorClass;
+	
+	class UPortalIndicator* indicatorInstance;
+	
+	UPROPERTY(EditAnywhere)
+	FName NextLevelName;
+	
+	UFUNCTION()
+	void OnPortalOverlap(UPrimitiveComponent* OverlappedComponent,AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	bool bIsPortalOpen = false;
 	void ShowPortal();
 };

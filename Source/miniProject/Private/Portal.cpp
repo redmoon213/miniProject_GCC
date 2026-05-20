@@ -3,9 +3,11 @@
 
 #include "Portal.h"
 
+#include "Blueprint/UserWidget.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
-
+#include "PortalIndicator.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APortal::APortal()
@@ -34,6 +36,20 @@ void APortal::BeginPlay()
 		decalComp->SetHiddenInGame(true);
 	}
 	
+	indicatorInstance = CreateWidget<UPortalIndicator>(GetWorld(), indicatorClass);
+	
+	if (indicatorInstance)
+	{
+		indicatorInstance->SetTarget(this);
+		indicatorInstance->AddToViewport();
+		
+		indicatorInstance->SetRenderOpacity(0.0f);
+	}
+	
+	if (boxComp)
+	{
+		boxComp->OnComponentBeginOverlap.AddDynamic(this, &APortal::OnPortalOverlap);
+	}
 }
 
 // Called every frame
@@ -44,5 +60,27 @@ void APortal::Tick(float DeltaTime)
 
 void APortal::ShowPortal()
 {
-	decalComp->SetHiddenInGame(false);
+	if (decalComp)
+	{
+		decalComp->SetHiddenInGame(false);
+		indicatorInstance->SetRenderOpacity(1.0f);
+		bIsPortalOpen = true;
+	}
+}
+
+void APortal::OnPortalOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (!bIsPortalOpen)
+	{
+		return;
+	}
+	
+	if (OtherActor&& OtherActor->IsA(APawn::StaticClass()))
+	{
+		if (!NextLevelName.IsNone())
+		{
+			UGameplayStatics::OpenLevel(GetWorld(), NextLevelName);
+		}
+		
+	}
 }

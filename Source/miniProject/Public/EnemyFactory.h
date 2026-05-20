@@ -31,6 +31,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class AEnemySpawnIndicator> spawnIndicator;
 	
+	UPROPERTY(EditAnywhere)
+	class UDecalComponent* bossSpawnDecal;
+	UPROPERTY(EditAnywhere)
+	class USceneComponent* sceneComp;
 	float minSpawnDistance = 300.0f;
 	float maxSpawnDistance = 1000.0f;
 	int32 enemiesSpawnLeft;

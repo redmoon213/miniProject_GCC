@@ -16,9 +16,19 @@ class MINIPROJECT_API URestartUI : public UUserWidget
 	
 	
 public:
+	UPROPERTY(meta=(BindWidget))
+	class UButton* btnRestart;
+	UPROPERTY(meta=(BindWidget))
+	class UButton* btnQuit;
 	
 	
 protected:
+	virtual void NativeConstruct() override;
 	
+	UFUNCTION()
+	void OnRestartClicked();
+	
+	UFUNCTION()
+	void OnQuitClicked();
 	
 };

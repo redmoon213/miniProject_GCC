@@ -24,6 +24,7 @@ void AMyGameModeBase::OnEnemyDie()
 	enemyCount--;
 	if (enemyCount <= 0 )
 	{
+		
 		StartBossSpawn();
 	}
 }

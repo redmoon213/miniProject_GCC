@@ -27,4 +27,8 @@ public:
 	class UBoxComponent* boxComp;
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* meshComp;
+	UPROPERTY(EditAnywhere)
+	class UDecalComponent* decalComp;
+	
+	void ShowPortal();
 };

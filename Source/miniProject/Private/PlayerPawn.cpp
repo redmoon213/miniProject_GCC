@@ -335,6 +335,9 @@ void APlayerPawn::Dash(const struct FInputActionValue& value)
 	
 	isDashing = true;
 	
+	boxComp->SetCollisionProfileName(TEXT("Ghost"));
+	damageBoxComp->SetCollisionProfileName(TEXT("Ghost"));
+	
 	FVector inputDirection = GetLastMovementInputVector().GetSafeNormal();
 	
 	FVector currentVelocity = GetVelocity();
@@ -371,6 +374,9 @@ void APlayerPawn::DashFinished()
 {
 	
 	isDashing = false;
+	boxComp->SetCollisionProfileName(TEXT("Player"));
+	
+	damageBoxComp->SetCollisionProfileName(TEXT("Player"));
 }
 
 ///플레이어 무기 교체 구현

@@ -15,6 +15,8 @@
 #include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "Engine/OverlapResult.h"
+
 
 // Sets default values
 AEnemy::AEnemy()
@@ -59,14 +61,7 @@ void AEnemy::BeginPlay()
 	Super::BeginPlay();
 	
 	// 주사위 눈금을 결정하고 업데이트
-	UMaterialInterface* baseMaterial = meshComp->GetMaterial(0);
-	if (baseMaterial!=nullptr)
-	{
-		dynamicMaterial = meshComp->CreateDynamicMaterialInstance(0, baseMaterial);
-		
-	}
-	currentDiceEye = FMath::RandRange(1, 6);
-	UpdateDiceEye();
+	
 	
 	player = UGameplayStatics::GetPlayerPawn(this, 0);
 	
@@ -86,12 +81,38 @@ void AEnemy::BeginPlay()
 	
 	//생성된 주사위가 어떤 행동을 할지 결정?
 	attackMode = FMath::RandRange(1,3);
-	
-	
 	if (attackMode <1 || attackMode>3 )
 	{
 		attackMode = 1;
 	}
+	
+	switch (attackMode)
+	{
+	case 1:
+		meshComp->SetMaterial(0, materialRed);
+		baseMaterial = materialRed;
+		break;
+	case 2:
+		meshComp->SetMaterial(0, materialBlue);
+		baseMaterial = materialBlue;
+		break;
+	case 3:
+		meshComp->SetMaterial(0, materialPurple);
+		baseMaterial = materialPurple;
+		break;
+	default:
+		meshComp->SetMaterial(0, materialRed);
+		break;
+	}
+	
+	if (baseMaterial!=nullptr)
+	{
+		dynamicMaterial = meshComp->CreateDynamicMaterialInstance(0, baseMaterial);
+		
+	}
+	
+	currentDiceEye = FMath::RandRange(1, 6);
+	UpdateDiceEye();
 	
 	//히트시 판정처리를 위한 함수연결
 	damageBoxComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnOverlapToPlayer);
@@ -174,18 +195,6 @@ void AEnemy::Knockback(FVector bulletDirection)
 }
 
 
-void AEnemy::Charging()
-{
-	currentChargeTime = 0.0f;
-	isCharging = true;
-	attackDecalComp->SetHiddenInGame(false);
-}
-
-void AEnemy::ChargingExcute()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Excute charge"));
-	
-}
 
 void AEnemy::FireProjectile()
 {
@@ -264,6 +273,69 @@ void AEnemy::FireProjectileMode(float deltaTime)
 		
 		currentProjectileCooldown = 0.0f;
 	}
+}
+
+void AEnemy::Charging()
+{
+	currentChargeTime = 0.0f;
+	isCharging = true;
+	attackDecalComp->SetHiddenInGame(false);
+}
+
+void AEnemy::ChargingExcute()
+{
+	
+	TArray<AActor*> ignoreActors;
+	ignoreActors.Add(this);
+	TArray<AActor*> totalHitActors;
+	
+	FVector overlapLocation = attackDecalComp->GetComponentLocation();
+	FRotator overlapRotation = attackDecalComp->GetComponentRotation();
+			
+			
+	FVector decalSize = attackDecalComp->DecalSize;
+	FVector scale = attackDecalComp->GetComponentScale();
+	FVector boxExtent;
+	boxExtent.X = (decalSize.X * scale.X) / 2.0f;
+	boxExtent.Y = (decalSize.Y * scale.Y) / 2.0f;
+	boxExtent.Z = (decalSize.Z * scale.Z) / 2.0f;
+	
+	TArray<AActor*> overlappedActors;
+	TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
+	TArray<FOverlapResult> overlapResults;
+	FCollisionObjectQueryParams objectParams;
+	objectTypes.Add(UEngineTypes::ConvertToObjectType(ECC_GameTraceChannel1));
+	
+	bool bHit = GetWorld()->OverlapMultiByObjectType(
+				overlapResults,
+				overlapLocation,
+				overlapRotation.Quaternion(),
+				objectParams,
+				FCollisionShape::MakeBox(boxExtent)
+				);
+	
+	for (const FOverlapResult& result : overlapResults)
+	{
+		AActor* hitActor = result.GetActor();
+		if (hitActor && hitActor != this)
+		{
+			totalHitActors.AddUnique(hitActor);
+		}
+	}
+	
+	for (AActor* hitActor : totalHitActors)
+	{
+		if (hitActor && hitActor == player)
+		{
+			
+			UGameplayStatics::ApplyDamage(hitActor, 1.0f, nullptr, this, nullptr);
+		
+			UE_LOG(LogTemp, Warning, TEXT("Excute charge"));
+		}
+	}
+	
+	
+	
 }
 
 void AEnemy::ChargingMode(float deltaTime)

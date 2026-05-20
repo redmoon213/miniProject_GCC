@@ -33,6 +33,15 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UStaticMeshComponent* meshComp;
 	
+	UPROPERTY(EditAnywhere, Category="Appearance")
+	class UMaterialInterface* materialRed;
+	UPROPERTY(EditAnywhere, Category="Appearance")
+	class UMaterialInterface* materialBlue;
+	UPROPERTY(EditAnywhere, Category="Appearance")
+	class UMaterialInterface* materialPurple;
+	
+	class UMaterialInterface* baseMaterial;
+	
 	UPROPERTY(EditAnywhere)
 	class UMaterialInstanceDynamic* dynamicMaterial;
 	

@@ -5,6 +5,7 @@
 
 #include "PlayerHealthIcon.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Image.h"
 
 void UPlayerHealthUI::NativeConstruct()
 {
@@ -30,8 +31,10 @@ void UPlayerHealthUI::NativeConstruct()
 			
 		}
 	}
-	
-	
+	if (hitVignetteImage)
+	{
+		hitVigetteMaterial = hitVignetteImage->GetDynamicMaterial();
+	}
 	
 }
 
@@ -47,4 +50,16 @@ void UPlayerHealthUI::UpdateHealthIcon(int32 currentHealth)
 		}
 		
 	}
+}
+
+void UPlayerHealthUI::StartPlayerHitAnimation()
+{
+	hitVigetteMaterial->SetScalarParameterValue(TEXT("Intensity"), 1.0f);
+	GetWorld()->GetTimerManager().SetTimer(playerHitAnimationtTimerHandle, this, &UPlayerHealthUI::EndPlayerHitAnimation, 0.2f, false );
+	
+}
+
+void UPlayerHealthUI::EndPlayerHitAnimation()
+{
+	hitVigetteMaterial->SetScalarParameterValue(TEXT("Intensity"), 0.0f);
 }

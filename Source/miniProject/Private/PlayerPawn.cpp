@@ -404,6 +404,11 @@ float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 		return 0.0f;
 	}
 	
+	if (playerHealthUIInstance != nullptr)
+	{
+		playerHealthUIInstance->StartPlayerHitAnimation();
+	}
+	
 	playerHp -= FMath::RoundToInt32(DamageAmount);
 	
 	if (playerHp <= 0)

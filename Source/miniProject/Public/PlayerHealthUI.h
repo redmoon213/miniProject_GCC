@@ -18,7 +18,6 @@ public:
 	UFUNCTION()
 	void UpdateHealthIcon(int32 currentHealth);
 
-	virtual void NativeConstruct() override;
 	
 	UPROPERTY(meta=(BindWidget))
 	class UHorizontalBox* healthBox;
@@ -32,5 +31,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	int32 maxHealth = 6;
 	
-
+	
+	//플레이어 피격시 애니메이션
+	
+	UPROPERTY(EditAnywhere, meta=(BindWidget))
+	class UImage* hitVignetteImage;
+	
+	class UMaterialInstanceDynamic* hitVigetteMaterial;
+	void StartPlayerHitAnimation();
+	FTimerHandle playerHitAnimationtTimerHandle;
+	void EndPlayerHitAnimation();
+protected:
+	virtual void NativeConstruct() override;
 };

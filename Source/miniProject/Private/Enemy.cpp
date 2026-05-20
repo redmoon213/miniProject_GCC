@@ -75,7 +75,6 @@ void AEnemy::BeginPlay()
 	
 	
 	isCharging = false;
-	maxChargeTime = 1.5f;
 	
 	////////
 	
@@ -194,17 +193,7 @@ void AEnemy::Knockback(FVector bulletDirection)
 	knockbackSpeed = bulletDirection * 1000.0f;
 }
 
-
-
-void AEnemy::FireProjectile()
-{
-	ABulletEnemyBasic* enemyBullet = GetWorld()->SpawnActor<ABulletEnemyBasic>(bulletFactory,
-		firePosition->GetComponentLocation(), firePosition->GetComponentRotation()
-		);
-	
-	
-}
-
+//단순 접근
 void AEnemy::MoveToPlayer(float deltaTime)
 {
 	
@@ -220,6 +209,16 @@ void AEnemy::MoveToPlayer(float deltaTime)
 	
 	AddActorWorldOffset(direction * deltaTime * moveSpeed, true);
 	SetActorRotation(smoothRotation);
+}
+
+//투사체 발사
+void AEnemy::FireProjectile()
+{
+	ABulletEnemyBasic* enemyBullet = GetWorld()->SpawnActor<ABulletEnemyBasic>(bulletFactory,
+		firePosition->GetComponentLocation(), firePosition->GetComponentRotation()
+		);
+	
+	
 }
 
 void AEnemy::FireProjectileMode(float deltaTime)
@@ -275,6 +274,8 @@ void AEnemy::FireProjectileMode(float deltaTime)
 	}
 }
 
+
+//차지공격
 void AEnemy::Charging()
 {
 	currentChargeTime = 0.0f;
@@ -334,15 +335,13 @@ void AEnemy::ChargingExcute()
 		}
 	}
 	
-	
-	
 }
 
 void AEnemy::ChargingMode(float deltaTime)
 {
 	currentChargeCoolTime += deltaTime;
 	
-	if (currentChargeCoolTime >= 3.0f)
+	if (currentChargeCoolTime >= maxChargeCoolTime)
 	{
 		Charging();
 		currentChargeCoolTime = 0.0f;

@@ -45,12 +45,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UMaterialInstanceDynamic* dynamicMaterial;
 	
-	UPROPERTY(EditAnywhere)
 	int32 currentDiceEye = 6;
 	
 	FTimerHandle hitFlashTimer;
 	FVector knockbackSpeed;
 	
+	UPROPERTY(EditAnywhere)
 	float moveSpeed = 300.0f;
 	
 	FVector dir;
@@ -79,8 +79,15 @@ public:
 	
 	bool isCharging = false;
 	float currentChargeTime;
-	float maxChargeTime;
+	
+	UPROPERTY(EditAnywhere)
+	float maxChargeTime = 1.5f;
+	
 	float currentChargeCoolTime = 0.0f;
+	
+	UPROPERTY(EditAnywhere)
+	float maxChargeCoolTime = 2.0f;
+	
 	
 	void Charging();
 	void ChargingExcute();
@@ -90,7 +97,9 @@ public:
 	
 	bool isProjectileReady = false;
 	float currentProjectileCooldown = 0.0f;
-	float maxProjectileCooldown = 2.0f;
+	
+	UPROPERTY(EditAnywhere)
+	float maxProjectileCooldown = 1.0f;
 	
 	
 	UPROPERTY(EditAnywhere)
@@ -108,7 +117,6 @@ public:
 	
 	int32 attackMode;
 	
-	void diceTakeDamage();
 	void ResetHitFlash();
 	void Knockback(FVector bulletDirection);
 	

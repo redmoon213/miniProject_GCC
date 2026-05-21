@@ -117,6 +117,7 @@ public:
 	float currentProjectileRadius = 0.0f;
 	UPROPERTY(EditAnywhere)
 	float increaseProjectileRadius = 3.0f;
+	UPROPERTY(EditAnywhere)
 	float maxProjectileRadius = 180.0f;
 	// --- --- --- --- --- --- --- --- --- ---
 	
@@ -186,8 +187,13 @@ public:
 	float jumpheigth = 400.0f;
 	
 	// 보스 패턴 결정을 위한 변수와 함수
-	UPROPERTY(EditAnywhere, Category="Boss|Pateern")
+	UPROPERTY(EditAnywhere, Category="Boss|Pattern")
 	float patternInterval = 1.0f;
+
+	// 각 패턴 종료 후 다음 패턴까지의 지연 시간을 담는 맵
+	UPROPERTY(EditAnywhere, Category="Boss|Pattern")
+	TMap<EBossPattern, float> PatternPostDelays;
+
 	void ChoosePattern();
 	void EndPattern();
 	EBossPattern CurrentPattern = EBossPattern::Idle;

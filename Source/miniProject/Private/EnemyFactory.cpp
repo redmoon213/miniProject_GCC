@@ -116,4 +116,8 @@ void AEnemyFactory::SpawnEnemyBoss()
 	FVector spawnLocation = GetActorLocation();
 	spawnLocation.Z = 0;
 	GetWorld()->SpawnActor<AEnemyBoss>(enemyBoss, spawnLocation, FRotator::ZeroRotator);
+	if (bossSpawnDecal)
+	{
+		bossSpawnDecal->SetHiddenInGame(true);
+	}
 }

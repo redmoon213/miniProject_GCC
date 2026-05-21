@@ -91,12 +91,14 @@ void AMyGameModeBase::SpawnBoss()
 
 void AMyGameModeBase::ReturnCameraToPlayer()
 {
+	SpawnBoss();
+	
 	APawn* player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (pc&&player)
 	{
-		pc->SetViewTargetWithBlend(player, 2.0f, EViewTargetBlendFunction::VTBlend_Cubic);
+		pc->SetViewTargetWithBlend(player, 2.5f, EViewTargetBlendFunction::VTBlend_Cubic);
 	}
-	GetWorld()->GetTimerManager().SetTimer(bossSpawnTimerHandle, this, &AMyGameModeBase::SpawnBoss, 2.0f, false);
+	//GetWorld()->GetTimerManager().SetTimer(bossSpawnTimerHandle, this, &AMyGameModeBase::SpawnBoss, 2.0f, false);
 
 
 }

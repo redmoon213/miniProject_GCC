@@ -1,0 +1,34 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "MyPlane.h"
+
+#include "Components/BoxComponent.h"
+
+
+// Sets default values
+AMyPlane::AMyPlane()
+{
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = true;
+	
+	boxComp = CreateDefaultSubobject<UBoxComponent>("BoxComponent");
+	SetRootComponent(boxComp);
+	
+	meshComp = CreateDefaultSubobject<UStaticMeshComponent>("StaticMeshComponent");
+	meshComp->SetupAttachment(boxComp);
+}
+
+// Called when the game starts or when spawned
+void AMyPlane::BeginPlay()
+{
+	Super::BeginPlay();
+	
+}
+
+// Called every frame
+void AMyPlane::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+

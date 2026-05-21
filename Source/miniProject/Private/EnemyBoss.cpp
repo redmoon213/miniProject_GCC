@@ -74,6 +74,12 @@ AEnemyBoss::AEnemyBoss()
 	boxComp->SetCollisionProfileName("Enemy");
 	maxHp = 100.0f;
 	currentHp = maxHp;
+
+	// 각 패턴별 기본 후딜레이 초기화 (1.0초)
+	PatternPostDelays.Add(EBossPattern::Projectile, 1.0f);
+	PatternPostDelays.Add(EBossPattern::Charging, 1.0f);
+	PatternPostDelays.Add(EBossPattern::JumpAttack, 1.0f);
+	PatternPostDelays.Add(EBossPattern::Moving, 1.0f);
 }
 
 // Called when the game starts or when spawned
@@ -524,6 +530,14 @@ void AEnemyBoss::ChoosePattern()
 
 void AEnemyBoss::EndPattern()
 {
+	// 1. 현재 종료되는 패턴의 후딜레이 값을 TMap에서 찾음
+	float nextDelay = patternInterval; // 기본 fallback 값
+	if (PatternPostDelays.Contains(CurrentPattern))
+	{
+		nextDelay = PatternPostDelays[CurrentPattern];
+	}
+
+	// 2. 상태 초기화
 	CurrentPattern = EBossPattern::Idle;
 	bIsShaking = false;
 	bIsCharging = false;
@@ -532,6 +546,7 @@ void AEnemyBoss::EndPattern()
 	bIsProjectilePattern = false;
 	bCanRotate = true;
 	
-	GetWorldTimerManager().SetTimer(bossPatternHandle, this, &AEnemyBoss::ChoosePattern, patternInterval, false);
+	// 3. 결정된 지연 시간 후 다음 패턴 실행
+	GetWorldTimerManager().SetTimer(bossPatternHandle, this, &AEnemyBoss::ChoosePattern, nextDelay, false);
 }
 

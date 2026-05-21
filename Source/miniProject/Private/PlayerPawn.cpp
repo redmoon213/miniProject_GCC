@@ -6,6 +6,7 @@
 #include "BulletPlayerBasic.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "MyPlayerController.h"
 #include "PlayerCursor.h"
 #include "PlayerHealthUI.h"
 #include "PlayerMagUI.h"
@@ -15,7 +16,7 @@
 #include "Components/TimelineComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
-
+#include "GameFramework/FloatingPawnMovement.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -421,7 +422,27 @@ float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 	{
 		//사망처리
 		UE_LOG(LogTemp, Warning, TEXT("Damage: %f, Current HP: %d"), DamageAmount, playerHp);
-		Destroy();
+		
+		AMyPlayerController* pc = Cast<AMyPlayerController>(GetController());
+		if (pc != nullptr)
+		{
+			pc->ShowRestartUI();
+		}
+		
+		if (meshComp)
+		{
+			meshComp->SetVisibility(false);
+		}
+		
+		SetActorEnableCollision(false);
+		
+		if (moveComp)
+		{
+			moveComp->StopMovementImmediately();
+			moveComp->Deactivate();
+		}
+		
+		//Destroy();
 	}
 	
 	else

@@ -20,9 +20,12 @@ public:
 	TSubclassOf<class UEnemyBossSpawnIndicator> bossSpawnIndicatorClass;
 	UEnemyBossSpawnIndicator* BossSpawnIndicatorInstance;
 	
-	
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class URestartUI> restartUIClass;
+	class URestartUI* restartUIInstance;
 	
 	void ShowBossSpawnWarning();
 	void HideBossSpawnWarning();
 	
+	void ShowRestartUI();
 };

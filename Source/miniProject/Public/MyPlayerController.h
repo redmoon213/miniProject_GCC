@@ -20,12 +20,23 @@ public:
 	TSubclassOf<class UEnemyBossSpawnIndicator> bossSpawnIndicatorClass;
 	UEnemyBossSpawnIndicator* BossSpawnIndicatorInstance;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<class URestartUI> restartUIClass;
+	UPROPERTY()
 	class URestartUI* restartUIInstance;
 	
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UEnemyBossHpUI> bossHpUIClass;
+	UPROPERTY()
+	class UEnemyBossHpUI* bossHpUIInstance;
+
 	void ShowBossSpawnWarning();
 	void HideBossSpawnWarning();
 	
 	void ShowRestartUI();
+
+	// 보스 체력바 제어 함수
+	void ShowBossHPBar(FString BossName);
+	void UpdateBossHP(float CurrentHP, float MaxHP);
+	void HideBossHPBar();
 };

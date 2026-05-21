@@ -9,12 +9,14 @@
 UENUM(BlueprintType)
 enum class EBossPattern : uint8
 {
+	Intro,      // 도입부 (체력바 차오르는 시간 대기)
 	Idle,
 	Projectile,
 	Charging,
 	JumpAttack,
 	Moving,
 	MAX
+	
 };
 
 
@@ -194,6 +196,8 @@ public:
 	UPROPERTY(EditAnywhere, Category="Boss|Pattern")
 	TMap<EBossPattern, float> PatternPostDelays;
 
+	void StartIntro();
+	void FinishIntro();
 	void ChoosePattern();
 	void EndPattern();
 	EBossPattern CurrentPattern = EBossPattern::Idle;

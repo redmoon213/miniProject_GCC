@@ -4,6 +4,8 @@
 #include "EnemyBoss.h"
 
 #include "BulletEnemyBasic.h"
+#include "MyPlayerController.h"
+#include "EnemyBossHpUI.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -38,7 +40,7 @@ AEnemyBoss::AEnemyBoss()
 
 	decalSouth = CreateDefaultSubobject<UDecalComponent>(TEXT("DecalSouth"));
 	decalSouth->SetupAttachment(decalGroup);
-	decalSouth->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
+	decalSouth->SetRelativeRotation(FRotator(-90.0f, 180.0f, 0.0f));
 
 	decalEast = CreateDefaultSubobject<UDecalComponent>(TEXT("DecalEast"));
 	decalEast->SetupAttachment(decalGroup);
@@ -46,7 +48,7 @@ AEnemyBoss::AEnemyBoss()
 
 	decalWest = CreateDefaultSubobject<UDecalComponent>(TEXT("DecalWest"));
 	decalWest->SetupAttachment(decalGroup);
-	decalWest->SetRelativeRotation(FRotator(-90.0f, 0.0f, 0.0f));
+	decalWest->SetRelativeRotation(FRotator(-90.0f, 0.0f, 180.0f));
 
 	// 기본값 설정 (에디터에서 수정 가능)
 	maxDecalLength = 1000.0f;
@@ -58,14 +60,12 @@ AEnemyBoss::AEnemyBoss()
 
 	decalSouth->DecalSize = FVector(500.0f, decalWidth, maxDecalLength);
 	decalSouth->SetRelativeLocation(FVector(-maxDecalLength / 2.0f, 0.0f, 0.0f));
-	decalSouth->SetRelativeRotation(FRotator(-90.0f, 180.0f, 0.0f));
 
 	decalEast->DecalSize = FVector(500.0f, maxDecalLength, decalWidth);
 	decalEast->SetRelativeLocation(FVector(0.0f, maxDecalLength / 2.0f, 0.0f));
 
 	decalWest->DecalSize = FVector(500.0f, maxDecalLength, decalWidth);
 	decalWest->SetRelativeLocation(FVector(0.0f, -maxDecalLength / 2.0f, 0.0f));
-	decalWest->SetRelativeRotation(FRotator(-90.0f, 0.0f, 180.0f));
 	
 	//투사체 발사를 위한 변수 초기화
 	firePosition = CreateDefaultSubobject<UArrowComponent>(TEXT("FirePosition"));
@@ -112,10 +112,41 @@ void AEnemyBoss::BeginPlay()
 	//
 	baseZ = GetActorLocation().Z;
 	
-	
-	
-	ChoosePattern();
+	// 플레이어 컨트롤러를 통해 보스 체력 바 표시 및 도입부 시작
+	StartIntro();
+}
 
+void AEnemyBoss::StartIntro()
+{
+	CurrentPattern = EBossPattern::Intro;
+	bCanRotate = false;
+
+	float finalIntroTime = 2.5f; // 기본값
+
+	AMyPlayerController* pc = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (pc)
+	{
+		pc->ShowBossHPBar(TEXT("DICE BOSS"));
+		pc->UpdateBossHP(currentHp, maxHp);
+
+		if (pc->bossHpUIInstance)
+		{
+			// UI에 설정된 차오르는 시간을 가져와서 보스 대기 시간으로 사용
+			finalIntroTime = pc->bossHpUIInstance->GetFillDuration();
+		}
+	}
+
+	// UI 애니메이션 시간만큼 대기 후 도입부 종료 함수 호출
+	GetWorldTimerManager().SetTimer(bossPatternHandle, this, &AEnemyBoss::FinishIntro, finalIntroTime, false);
+}
+
+void AEnemyBoss::FinishIntro()
+{
+	CurrentPattern = EBossPattern::Idle;
+	bCanRotate = true;
+	
+	// 첫 번째 패턴 선택
+	ChoosePattern();
 }
 
 // Called every frame
@@ -408,16 +439,27 @@ float AEnemyBoss::TakeDamage(float DamageAmount, struct FDamageEvent const& Dama
 	}
 	
 	currentHp -= FMath::RoundToInt(DamageAmount);
+
+	// UI 업데이트
+	AMyPlayerController* pc = Cast<AMyPlayerController>(GetWorld()->GetFirstPlayerController());
+	if (pc)
+	{
+		pc->UpdateBossHP(currentHp, maxHp);
+	}
 	
 	hitFlashDynamicMaterial->SetScalarParameterValue("HitFlash", 1.0f);
 	GetWorld()->GetTimerManager().SetTimer(hitFlashHandle, this, &AEnemyBoss::ResetHitFlash, 0.1f, false);
 	
 	if (currentHp <= 0)
 	{
+		if (pc)
+		{
+			pc->HideBossHPBar();
+		}
 		Destroy();
 	}
 	
-	return 0.0f;
+	return DamageAmount;
 }
 
 void AEnemyBoss::ResetHitFlash()
@@ -502,7 +544,7 @@ void AEnemyBoss::ChoosePattern()
 	{
 		return;
 	}
-	int32 randomIdx = FMath::RandRange(1, static_cast<int32>(EBossPattern::MAX) - 1);
+	int32 randomIdx = FMath::RandRange(2, static_cast<int32>(EBossPattern::MAX) - 1);
 	
 	EBossPattern selectedPattern = static_cast<EBossPattern>(randomIdx);
 	
@@ -549,4 +591,3 @@ void AEnemyBoss::EndPattern()
 	// 3. 결정된 지연 시간 후 다음 패턴 실행
 	GetWorldTimerManager().SetTimer(bossPatternHandle, this, &AEnemyBoss::ChoosePattern, nextDelay, false);
 }
-

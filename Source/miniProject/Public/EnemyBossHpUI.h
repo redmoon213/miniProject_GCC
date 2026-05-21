@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "EnemyBossHPUI.generated.h"
+#include "EnemyBossHpUI.generated.h"
 
 /**
  * 보스 체력 바를 관리하는 UI 클래스입니다.
  */
 UCLASS()
-class MINIPROJECT_API UEnemyBossHPUI : public UUserWidget
+class MINIPROJECT_API UEnemyBossHpUI : public UUserWidget
 {
 	GENERATED_BODY()
 

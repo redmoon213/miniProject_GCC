@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "miniProject/Public/PlayerPawn.h"
 
 #include "BulletPlayerBasic.h"
+#include "BulletPlayerSpiral.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "MyPlayerController.h"
@@ -138,13 +139,28 @@ void APlayerPawn::BeginPlay()
 		playerHealthUIInstance->UpdateHealthIcon(playerHp);
 	}
 	
-	//플레이어 탄창 UI
-	playerMagUIInstance = CreateWidget<UPlayerMagUI>(GetWorld(), playerMagUIClass);
-	if (playerMagUIInstance != nullptr)
+	// Q 스킬 (탄창) UI 생성
+	if (qSkillUiClass)
 	{
-		playerMagUIInstance->AddToViewport();
-		playerMagUIInstance->SetVisibility(ESlateVisibility::Collapsed);
-		playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+		qSkillUiInstance = CreateWidget<UPlayerMagUI>(GetWorld(), qSkillUiClass);
+		if (qSkillUiInstance)
+		{
+			qSkillUiInstance->AddToViewport();
+			qSkillUiInstance->SetVisibility(ESlateVisibility::Visible);
+			qSkillUiInstance->UpdataAmmo(currentAmmo, maxAmmo);
+		}
+	}
+
+	// E 스킬 (쿨다운) UI 생성
+	if (eSkillUiClass)
+	{
+		eSkillUiInstance = CreateWidget<UPlayerMagUI>(GetWorld(), eSkillUiClass);
+		if (eSkillUiInstance)
+		{
+			eSkillUiInstance->AddToViewport();
+			eSkillUiInstance->SetVisibility(ESlateVisibility::Visible);
+			eSkillUiInstance->UpdateSkillCooldown(1.0f);
+		}
 	}
 	
 	APlayerController* pc = GetWorld()->GetFirstPlayerController();
@@ -186,15 +202,13 @@ void APlayerPawn::BeginPlay()
 		dynamicMaterial = meshComp->CreateDynamicMaterialInstance(0, baseMaterial);
 	}
 	
-	playerMagUIInstance->SetVisibility(ESlateVisibility::Visible);
-
 	// 레벨 이동 간 탄약 로드
 	if (UMyGameInstance* gi = Cast<UMyGameInstance>(GetGameInstance()))
 	{
 		currentAmmo = gi->currentAmmo;
-		if (playerMagUIInstance != nullptr)
+		if (qSkillUiInstance != nullptr)
 		{
-			playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+			qSkillUiInstance->UpdataAmmo(currentAmmo, maxAmmo);
 		}
 	}
 }
@@ -203,6 +217,24 @@ void APlayerPawn::BeginPlay()
 void APlayerPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// E 스킬 쿨다운 업데이트
+	if (!bCanUseSkillE)
+	{
+		currentSkillECoolDown += DeltaTime;
+		if (currentSkillECoolDown >= skillECoolDown)
+		{
+			//currentSkillECoolDown = 0.0f;
+			bCanUseSkillE = true;
+		}
+
+		// UI 업데이트 (E 스킬 전용 인스턴스 사용)
+		if (eSkillUiInstance)
+		{
+			float cooldownPercent = currentSkillECoolDown / skillECoolDown;
+			eSkillUiInstance->UpdateSkillCooldown(cooldownPercent);
+		}
+	}
 
 	// 탄퍼짐 회복 로직: 매 프레임마다 현재 탄퍼짐을 최소치로 줄입니다.
 	if (currentSpread > minSpread)
@@ -277,6 +309,11 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		{
 			eic->BindAction(iaUseSkill_Q, ETriggerEvent::Started, this, &APlayerPawn::UseSkill);
 		}
+
+		if (iaUseSkill_E != nullptr)
+		{
+			eic->BindAction(iaUseSkill_E, ETriggerEvent::Started, this, &APlayerPawn::UseSkill_E);
+		}
 	}
 }
 
@@ -346,35 +383,13 @@ void APlayerPawn::Fire()
 		lastFireTime = currentTime;
 	}
 
-	// 2. 연사 모드(fireMode 2)일 때만 탄약 체크
-	/*if (fireMode == 2 && currentAmmo <= 0)
-	{
-		return;
-	}*/
-
 	// 3. 탄환 생성 위치 및 회전 계산
 	FVector spawnLocation = firePosition->GetComponentLocation();
 	FRotator spawnRotation = firePosition->GetComponentRotation();
 
 	// 4. 현재 누적된 탄퍼짐(currentSpread)을 좌우(Yaw) 방향으로 적용
-	// FMath::RandRange(Min, Max): 지정된 범위 내의 랜덤한 실수를 반환합니다.
 	float randomYaw = FMath::RandRange(-currentSpread, currentSpread);
 	spawnRotation.Yaw += randomYaw;
-
-	// 수정 전 코드
-	/*
-	if (currentAmmo <= 0)
-	{
-		return;
-	}
-	// ... (중략) ...
-	currentAmmo--;
-	playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
-	*/
-
-	// 5. 변형된 회전값으로 탄환 생성 (TArray 기반으로 복구)
-	// ABulletPlayerBasic* bulletPlayer = GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactory,
-	// 	spawnLocation, spawnRotation);
 
 	int32 factoryIndex = fireMode - 1;
 	if (bulletFactories.IsValidIndex(factoryIndex) && bulletFactories[factoryIndex] != nullptr)
@@ -386,16 +401,15 @@ void APlayerPawn::Fire()
 	}
 
 	// 6. 탄퍼짐 누적: 발사 후 탄퍼짐 값을 증가시킵니다.
-	// FMath::Min: 최대치를 넘지 않도록 보정합니다.
 	currentSpread = FMath::Min(currentSpread + spreadIncrement, maxSpread);
 	
 	// 7. 연사 모드(fireMode 2)일 때만 탄약 소모 및 UI 업데이트
 	if (fireMode == 2)
 	{
-		//currentAmmo--;
-		if (playerMagUIInstance != nullptr)
+		// Q 스킬 충전용 UI 업데이트
+		if (qSkillUiInstance != nullptr)
 		{
-			playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+			qSkillUiInstance->UpdataAmmo(currentAmmo, maxAmmo);
 		}
 
 		// GameInstance에 저장
@@ -404,8 +418,6 @@ void APlayerPawn::Fire()
 			gi->currentAmmo = currentAmmo;
 		}
 	}
-	
-	
 }
 
 
@@ -465,34 +477,9 @@ void APlayerPawn::DashFinished()
 	damageBoxComp->SetCollisionProfileName(TEXT("Player"));
 }
 
-///플레이어 무기 교체 구현
-/*
-void APlayerPawn::ChangeWeapon(const struct FInputActionValue& value)
-{
-	float getValue = value.Get<float>();
-	
-	fireMode = FMath::RoundToInt32(getValue);
-	
-	if (fireMode == 2)
-	{
-		playerMagUIInstance->SetVisibility(ESlateVisibility::Visible);
-	}
-	
-	else
-	{
-		playerMagUIInstance->SetVisibility(ESlateVisibility::Collapsed);
-	}
-}
-*/
-
 ///플레이어 피해받을때 처리하는 기능
 float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
-	
-	/*if (DamageCauser&&DamageCauser->ActorHasTag((FName("Debris"))))
-	{
-		return 0.0f;
-	}*/
 	if (bIsInvincible||playerHp<=0||(DamageCauser&&DamageCauser->ActorHasTag((FName("Debris")))))
 	{
 		return 0.0f;
@@ -528,8 +515,6 @@ float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& Dam
 			moveComp->StopMovementImmediately();
 			moveComp->Deactivate();
 		}
-		
-		//Destroy();
 	}
 	
 	else
@@ -556,9 +541,9 @@ void APlayerPawn::LootAmmo(int32 ammoAmount)
 {
 	currentAmmo = FMath::Min(currentAmmo + ammoAmount, maxAmmo);
 	
-	if (playerMagUIInstance != nullptr)
+	if (qSkillUiInstance != nullptr)
 	{
-		playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+		qSkillUiInstance->UpdataAmmo(currentAmmo, maxAmmo);
 	}
 
 	// GameInstance에 저장
@@ -578,9 +563,9 @@ void APlayerPawn::UseSkill()
 
 	// 탄약 소모 및 UI 업데이트
 	currentAmmo = 0;
-	if (playerMagUIInstance != nullptr)
+	if (qSkillUiInstance != nullptr)
 	{
-		playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+		qSkillUiInstance->UpdataAmmo(currentAmmo, maxAmmo);
 	}
 
 	// GameInstance에 저장
@@ -592,6 +577,30 @@ void APlayerPawn::UseSkill()
 	// 스킬 웨이브 초기화 및 실행
 	skillWaveCount = 0;
 	ExecuteSkillWave();
+}
+
+void APlayerPawn::UseSkill_E()
+{
+	// 쿨다운 체크
+	if (!bCanUseSkillE)
+	{
+		return;
+	}
+
+	// 탄약 체크 등 필요 조건 추가 가능
+	if (spiralBulletClass)
+	{
+		FVector spawnLocation = GetActorLocation();
+		FRotator spawnRotation = GetActorRotation();
+
+		GetWorld()->SpawnActor<ABulletPlayerSpiral>(spiralBulletClass, spawnLocation, spawnRotation);
+		
+		UE_LOG(LogTemp, Warning, TEXT("나선형 스킬(E) 발동!"));
+
+		// 쿨다운 시작
+		bCanUseSkillE = false;
+		currentSkillECoolDown = 0.0f;
+	}
 }
 
 void APlayerPawn::ExecuteSkillWave()
@@ -618,8 +627,6 @@ void APlayerPawn::ExecuteSkillWave()
 	{
 		// 3단계: 5발 발사
 		SpawnFanBullets(5, 60.0f);
-		
-		// 스킬 종료 (타이머 클리어는 선택 사항, 여기서는 단발성 타이머이므로 자동 종료됨)
 	}
 }
 
@@ -634,7 +641,6 @@ void APlayerPawn::SpawnFanBullets(int32 bulletCount, float spreadAngle)
 	FRotator baseRotation = firePosition->GetComponentRotation();
 
 	// 부채꼴 계산
-	// 예: 3발, 30도 -> -15도, 0도, +15도 순으로 발사
 	float startAngle = -spreadAngle / 2.0f;
 	float angleStep = (bulletCount > 1) ? (spreadAngle / (bulletCount - 1)) : 0.0f;
 

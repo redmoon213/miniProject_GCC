@@ -16,6 +16,7 @@ class MINIPROJECT_API UPlayerMagUI : public UUserWidget
 	
 public:
 	void UpdataAmmo(int32 currentAmmo, int32 maxAmmo);
+	void UpdateSkillCooldown(float Percent);
 	
 	virtual void NativeConstruct() override;
 	

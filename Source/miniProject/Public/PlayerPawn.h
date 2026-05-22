@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -61,6 +61,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class UInputAction* iaUseSkill_Q;
+
+	UPROPERTY(EditAnywhere)
+	class UInputAction* iaUseSkill_E;
 	
 	
 	UPROPERTY(EditAnywhere)
@@ -74,13 +77,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UArrowComponent* firePosition;
 	
-	// 수정 전 코드
-	// UPROPERTY(EditAnywhere)
-	// TSubclassOf<class ABulletPlayerBasic> bulletFactory;
-	
 	// 무기별 탄환 블루프린트 배열
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	TArray<TSubclassOf<class ABulletPlayerBasic>> bulletFactories;
+
+	// 나선형 스킬 총알 클래스
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<class ABulletPlayerSpiral> spiralBulletClass;
 	
 	//발사 관련 변수
 	
@@ -142,7 +145,9 @@ public:
 	bool bIsInvincible = false;
 	void ResetInvincibility();
 	
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;	UPROPERTY()
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	
+	UPROPERTY()
 	class UMaterialInstanceDynamic* dynamicMaterial;
 	
 	// 플레이어 UI
@@ -152,16 +157,22 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UPlayerHealthUI* playerHealthUIInstance;
 	
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UPlayerMagUI> qSkillUiClass;
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UPlayerMagUI> playerMagUIClass;
+	class UPlayerMagUI* qSkillUiInstance;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UPlayerMagUI> eSkillUiClass;
 	UPROPERTY(EditAnywhere)
-	class UPlayerMagUI* playerMagUIInstance;
+	class UPlayerMagUI* eSkillUiInstance;
 	
 	//
 	void LootAmmo(int32 ammoAmount);
 
 	// 스킬 관련 함수 및 변수
 	void UseSkill();
+	void UseSkill_E();
 	
 	void ExecuteSkillWave();
 	
@@ -169,6 +180,13 @@ public:
 
 	int32 skillWaveCount = 0;
 	FTimerHandle skillTimerHandle;
+
+	// E 스킬 쿨다운 관련
+	UPROPERTY(EditAnywhere, Category = "Skill")
+	float skillECoolDown = 5.0f;
+
+	float currentSkillECoolDown = 0.0f;
+	bool bCanUseSkillE = true;
 	
 private:
 	//float h;

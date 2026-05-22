@@ -15,7 +15,12 @@ void UPlayerHealthIcon::SetIsFull(bool bIsFull)
 	
 	if (bIsFull)
 	{
-		if (fullTexture)
+		// 마테리얼이 할당되어 있다면 마테리얼을 우선 사용합니다.
+		if (fullMaterial)
+		{
+			healthIcon->SetBrushFromMaterial(fullMaterial);
+		}
+		else if (fullTexture)
 		{
 			healthIcon->SetBrushFromTexture(fullTexture);
 		}
@@ -24,7 +29,12 @@ void UPlayerHealthIcon::SetIsFull(bool bIsFull)
 	
 	else
 	{
-		if (emptyTexture)
+		// 마테리얼이 할당되어 있다면 마테리얼을 우선 사용합니다.
+		if (emptyMaterial)
+		{
+			healthIcon->SetBrushFromMaterial(emptyMaterial);
+		}
+		else if (emptyTexture)
 		{
 			healthIcon->SetBrushFromTexture(emptyTexture);
 		}

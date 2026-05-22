@@ -23,6 +23,13 @@ public:
 	class UTexture2D* fullTexture;
 	UPROPERTY(EditAnywhere)
 	class UTexture2D* emptyTexture;
+
+	// 마테리얼 기반 아이콘을 지원하기 위한 변수입니다.
+	UPROPERTY(EditAnywhere, Category = "Appearance")
+	class UMaterialInterface* fullMaterial;
+
+	UPROPERTY(EditAnywhere, Category = "Appearance")
+	class UMaterialInterface* emptyMaterial;
 	
 	void SetIsFull(bool bIsFull);
 	

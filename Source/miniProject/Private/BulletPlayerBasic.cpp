@@ -67,6 +67,13 @@ void ABulletPlayerBasic::OnBulletOverlap(UPrimitiveComponent* OverlappedComponen
 	}
 	*/
 
+	// 벽 태그를 가진 액터와 충돌했는지 확인합니다.
+	if (OtherActor && OtherActor->ActorHasTag(TEXT("Wall")))
+	{
+		Destroy();
+		return;
+	}
+
 	// 보스 타격 시 탄약 획득 로직 추가
 	if (AEnemyBoss* bossActor = Cast<AEnemyBoss>(OtherActor))
 	{

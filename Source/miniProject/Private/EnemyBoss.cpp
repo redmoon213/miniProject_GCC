@@ -391,6 +391,12 @@ void AEnemyBoss::MoveStart()
 		bIsMoving = true;
 		hopAlpha = 0.0f;
 		//bCanRotate = false;
+
+		// 이동 시작 사운드 재생
+		if (soundMove)
+		{
+			UGameplayStatics::PlaySoundAtLocation(this, soundMove, GetActorLocation());
+		}
 	}
 }
 

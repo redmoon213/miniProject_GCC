@@ -164,7 +164,20 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class USoundBase* hitSound;
-	//
+	
+	// --- 패턴별 사운드 변수 ---
+	UPROPERTY(EditAnywhere, Category = "Boss|Sound")
+	class USoundBase* soundProjectile;
+
+	UPROPERTY(EditAnywhere, Category = "Boss|Sound")
+	class USoundBase* soundCrossCharge;
+
+	UPROPERTY(EditAnywhere, Category = "Boss|Sound")
+	class USoundBase* soundJumpAttack;
+
+	UPROPERTY(EditAnywhere, Category = "Boss|Sound")
+	class USoundBase* soundMove;
+	// --- --- --- --- --- ---
 	
 	//플레이어를 타겟으로 한 점프 공격 변수 및 함수
 	void StartJumpAttack();

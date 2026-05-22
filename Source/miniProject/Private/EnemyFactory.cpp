@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyFactory.h"
@@ -9,6 +9,7 @@
 #include "NavigationSystem.h"
 #include "Components/DecalComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 
 // Sets default values
@@ -55,7 +56,7 @@ bool AEnemyFactory::GetValidSpawnLocation(FVector& outLocation)
 	
 	FVector playerLocation = playerPawn->GetActorLocation();
 	
-	for (int i =0; i<10; i++)
+	for (int i = 0; i < 20; i++) // 시도 횟수를 늘림
 	{
 		float randDistance = FMath::RandRange(minSpawnDistance, maxSpawnDistance);
 	
@@ -67,15 +68,22 @@ bool AEnemyFactory::GetValidSpawnLocation(FVector& outLocation)
 	
 		FNavLocation navLocation;
 	
-		if (navSys->ProjectPointToNavigation(targetPoint, navLocation, FVector(500.0f, 500.0f, 1000.0f)))
+		// 허용 범위를 50으로 더 축소하여 정밀도를 높입니다.
+		if (navSys->ProjectPointToNavigation(targetPoint, navLocation, FVector(50.0f, 50.0f, 100.0f)))
 		{
-			outLocation = navLocation.Location;
-		
-			return true;
-	
+		// ProjectPointToNavigation이 true를 반환하면 유효한 내비메쉬 지점을 찾은 것입니다.
+		outLocation = navLocation.Location;
+
+		// 수정 전 코드
+		// 성공한 지점에 초록색 구체 표시 (디버그용)
+		// DrawDebugSphere(GetWorld(), outLocation, 30.0f, 12, FColor::Green, false, 3.0f);
+		return true;
 		}
-	}
-	outLocation = playerLocation + FVector(1000.0f, 0.0f, 0.0f);
+
+		// 수정 전 코드
+		// 실패한 지점에 빨간색 점 표시 (디버그용)
+		// DrawDebugPoint(GetWorld(), targetPoint, 10.0f, FColor::Red, false, 1.0f);
+		}	outLocation = playerLocation + FVector(minSpawnDistance, 0.0f, 0.0f);
 	return true;
 }
 
@@ -101,14 +109,14 @@ void AEnemyFactory::SpawnSingleEnemy()
 	if (GetValidSpawnLocation(spawnLocation))
 	{
 		FActorSpawnParameters spawnParams;
-		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-		//GetWorld()->SpawnActor<AEnemy>(enemy, spawnLocation, FRotator::ZeroRotator, spawnParams);
-		spawnLocation.Z = 0;
+		
+		// 충돌 시 절대 생성하지 않도록 가장 엄격한 옵션 적용
+		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::DontSpawnIfColliding;
+		
+		// Indicator 생성
 		GetWorld()->SpawnActor<AEnemySpawnIndicator>(spawnIndicator, spawnLocation, FRotator::ZeroRotator, spawnParams);
 		enemiesSpawnLeft--;
 	}
-	
-	
 }
 
 void AEnemyFactory::SpawnEnemyBoss()

@@ -6,6 +6,7 @@
 #include "Enemy.h"
 #include "Components/BoxComponent.h"
 #include "Components/DecalComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -42,11 +43,28 @@ void AEnemySpawnIndicator::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	spawnTime += DeltaTime;
-	chargePercent = FMath::Clamp(spawnTime / 2.0f, 0.0f, 1.0f);
+	chargePercent = FMath::Clamp(spawnTime / maxSpawnTime, 0.0f, 1.0f);
 	dynamicMaterialInstance->SetScalarParameterValue("chargePercent", chargePercent);
-	if (spawnTime >= 2.0f)
+	if (spawnTime >= maxSpawnTime)
 	{
-		GetWorld()->SpawnActor<AEnemy>(enemy, GetActorLocation(), GetActorRotation());
+		FVector spawnLocation = GetActorLocation();
+
+		// 수정 전 코드
+		/*
+		if (boxComp)
+		{
+			spawnLocation.Z += boxComp->GetUnscaledBoxExtent().Z;
+		}
+		*/
+
+		// 플레이어의 Z값을 가져와서 동일한 높이에 스폰되게 합니다.
+		APawn* playerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+		if (playerPawn)
+		{
+			spawnLocation.Z = playerPawn->GetActorLocation().Z;
+		}
+
+		GetWorld()->SpawnActor<AEnemy>(enemy, spawnLocation, GetActorRotation());
 		this->Destroy();
 	}
 	

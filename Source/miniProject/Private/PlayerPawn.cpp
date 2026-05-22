@@ -75,6 +75,57 @@ APlayerPawn::APlayerPawn()
 void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 수정 전 코드
+	/*
+	playerCursorInstance = CreateWidget<UPlayerCursor>(GetWorld(), playerCursorClass);
+	
+	//플레이어 체력바 UI
+	playerHealthUIInstance =  CreateWidget<UPlayerHealthUI>(GetWorld(), playerHealthUIClass);
+	if (playerHealthUIInstance != nullptr)
+	{
+		playerHealthUIInstance->AddToViewport();
+		playerHealthUIInstance->UpdateHealthIcon(playerHp);
+	}
+	
+	//플레이어 탄창 UI
+	playerMagUIInstance = CreateWidget<UPlayerMagUI>(GetWorld(), playerMagUIClass);
+	if (playerMagUIInstance != nullptr)
+	{
+		playerMagUIInstance->AddToViewport();
+		playerMagUIInstance->SetVisibility(ESlateVisibility::Collapsed);
+		playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+	}
+	
+	APlayerController* pc = GetWorld()->GetFirstPlayerController();
+	if (pc != nullptr)
+	{
+		pc->bShowMouseCursor = true;  // 화면에 마우스 커서가 보이도록 함
+		pc->SetMouseCursorWidget(EMouseCursor::Default, playerCursorInstance);
+		
+		// 입력 모드를 게임과 UI 모두 가능하도록 설정 (재시작 시 조작 불능 해결)
+		FInputModeGameAndUI inputMode;
+		inputMode.SetHideCursorDuringCapture(false);
+		pc->SetInputMode(inputMode);
+		
+		UEnhancedInputLocalPlayerSubsystem* subsys =
+			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer());
+		if (subsys != nullptr)
+		{
+			subsys->AddMappingContext(imcPlayerInput, 0);
+		}
+	}
+	*/
+
+	// 현재 레벨 이름을 확인합니다.
+	FString currentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
+
+	// 메인 메뉴 레벨이라면 플레이어 관련 UI와 입력을 활성화하지 않습니다.
+	if (currentLevelName == "MainMenu")
+	{
+		return;
+	}
+
 	// 위젯 생성코드는 무조건 BeginPlay안에 넣어야함 생성자에 넣으면 크래시 난다고함
 	
 	playerCursorInstance = CreateWidget<UPlayerCursor>(GetWorld(), playerCursorClass);

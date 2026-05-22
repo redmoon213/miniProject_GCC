@@ -36,4 +36,7 @@ public:
 	
 	float chargePercent = 0.0f;
 	float spawnTime = 0.0f;
+	
+	UPROPERTY(EditAnywhere)
+	float maxSpawnTime = 1.0f;
 };

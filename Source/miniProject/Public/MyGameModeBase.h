@@ -33,6 +33,10 @@ public:
 	
 	void ReturnCameraToPlayer();
 	
+	// 메인 메뉴 UI 클래스를 담을 변수입니다. 에디터에서 할당해야 합니다.
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UUserWidget> mainMenuWidgetClass;
+	
 protected:
 	virtual void BeginPlay() override;
 };

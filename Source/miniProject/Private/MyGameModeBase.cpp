@@ -8,6 +8,7 @@
 #include "MyPlayerController.h"
 #include "Portal.h"
 #include "Components/DecalComponent.h"
+#include "MainMenuUI.h"
 #include "Kismet/GameplayStatics.h"
 
 void AMyGameModeBase::BeginPlay()
@@ -17,8 +18,23 @@ void AMyGameModeBase::BeginPlay()
 	
 	FString currentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
 	
-	
-	if (currentLevelName == "BossFight")
+	// 레벨 이름이 "MainMenu"인 경우 메인 메뉴 UI를 생성하고 표시합니다.
+	if (currentLevelName == "MainMenu")
+	{
+		if (mainMenuWidgetClass && pc)
+		{
+			// 위젯을 생성합니다.
+			UUserWidget* mainMenuWidget = CreateWidget<UUserWidget>(GetWorld(), mainMenuWidgetClass);
+			if (mainMenuWidget)
+			{
+				// 화면에 추가합니다.
+				mainMenuWidget->AddToViewport();
+				// PlayerController를 통해 입력 모드를 설정합니다.
+				pc->SetMenuInputMode(mainMenuWidget);
+			}
+		}
+	}
+	else if (currentLevelName == "BossFight")
 	{
 		if (eFactory)
 		{

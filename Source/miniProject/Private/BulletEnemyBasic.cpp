@@ -53,6 +53,11 @@ void ABulletEnemyBasic::OnOverlapToPlayer(UPrimitiveComponent* OverlappedCompone
 		UGameplayStatics::ApplyDamage(player, 1.0f, nullptr, this, nullptr);
 		Destroy();
 	}
+	// 벽 태그를 가진 액터와 충돌했는지 확인합니다.
+	else if (OtherActor && OtherActor->ActorHasTag(TEXT("Wall")))
+	{
+		Destroy();
+	}
 }
 
 

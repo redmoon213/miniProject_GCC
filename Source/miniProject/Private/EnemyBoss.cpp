@@ -437,6 +437,12 @@ float AEnemyBoss::TakeDamage(float DamageAmount, struct FDamageEvent const& Dama
 	{
 		return 0.0f;
 	}
+
+	// 피격 사운드 재생
+	if (hitSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, hitSound, GetActorLocation());
+	}
 	
 	currentHp -= FMath::RoundToInt(DamageAmount);
 

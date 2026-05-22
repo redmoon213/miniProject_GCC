@@ -434,6 +434,12 @@ float AEnemy::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEv
 	{
 		return 0.0f;
 	}
+
+	// 피격 사운드 재생
+	if (hitSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, hitSound, GetActorLocation());
+	}
 	
 	if (currentDiceEye == 1)
 	{

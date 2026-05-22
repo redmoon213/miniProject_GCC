@@ -58,6 +58,9 @@ public:
 	class UInputAction* iaDash;
 	UPROPERTY(EditAnywhere)
 	class UInputAction* iaChangeWeapon;
+
+	UPROPERTY(EditAnywhere)
+	class UInputAction* iaUseSkill_Q;
 	
 	
 	UPROPERTY(EditAnywhere)
@@ -81,7 +84,7 @@ public:
 	
 	//발사 관련 변수
 	
-	int32 fireMode = 1;
+	int32 fireMode = 2;
 	FTimerHandle autoFireTimerHandle;
 	
 	UPROPERTY(EditAnywhere)
@@ -89,7 +92,7 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USoundBase* fireSound;
 	
-	int32 currentAmmo = 30;
+	int32 currentAmmo = 0;
 	int32 maxAmmo = 30;
 
 	// 탄퍼짐 관련 변수
@@ -156,6 +159,16 @@ public:
 	
 	//
 	void LootAmmo(int32 ammoAmount);
+
+	// 스킬 관련 함수 및 변수
+	void UseSkill();
+	
+	void ExecuteSkillWave();
+	
+	void SpawnFanBullets(int32 bulletCount, float spreadAngle);
+
+	int32 skillWaveCount = 0;
+	FTimerHandle skillTimerHandle;
 	
 private:
 	//float h;

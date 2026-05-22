@@ -4,6 +4,8 @@
 #include "BulletPlayerBasic.h"
 
 #include "Enemy.h"
+#include "EnemyBoss.h"
+#include "PlayerPawn.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -64,6 +66,15 @@ void ABulletPlayerBasic::OnBulletOverlap(UPrimitiveComponent* OverlappedComponen
 		this->Destroy();
 	}
 	*/
+
+	// 보스 타격 시 탄약 획득 로직 추가
+	if (AEnemyBoss* bossActor = Cast<AEnemyBoss>(OtherActor))
+	{
+		if (APlayerPawn* playerPawn = Cast<APlayerPawn>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0)))
+		{
+			playerPawn->LootAmmo(1);
+		}
+	}
 	
 	UGameplayStatics::ApplyDamage(OtherActor, 1.0f, nullptr, this, nullptr);
 	Destroy();

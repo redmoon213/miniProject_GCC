@@ -161,6 +161,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class UMaterialInstanceDynamic* hitFlashDynamicMaterial;
+
+	UPROPERTY(EditAnywhere)
+	class USoundBase* hitSound;
 	//
 	
 	//플레이어를 타겟으로 한 점프 공격 변수 및 함수

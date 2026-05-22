@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "MyPlayerController.h"
+#include "MyGameInstance.h"
 #include "PlayerCursor.h"
 #include "PlayerHealthUI.h"
 #include "PlayerMagUI.h"
@@ -17,6 +18,7 @@
 #include "GameFramework/FloatingPawnMovement.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APlayerPawn::APlayerPawn()
@@ -100,6 +102,10 @@ void APlayerPawn::BeginPlay()
 		pc->bShowMouseCursor = true;  // 화면에 마우스 커서가 보이도록 함
 		pc->SetMouseCursorWidget(EMouseCursor::Default, playerCursorInstance);
 		
+		// 입력 모드를 게임과 UI 모두 가능하도록 설정 (재시작 시 조작 불능 해결)
+		FInputModeGameAndUI inputMode;
+		inputMode.SetHideCursorDuringCapture(false);
+		pc->SetInputMode(inputMode);
 		
 		UEnhancedInputLocalPlayerSubsystem* subsys =
 			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer());
@@ -127,6 +133,18 @@ void APlayerPawn::BeginPlay()
 	if (baseMaterial != nullptr)
 	{
 		dynamicMaterial = meshComp->CreateDynamicMaterialInstance(0, baseMaterial);
+	}
+	
+	playerMagUIInstance->SetVisibility(ESlateVisibility::Visible);
+
+	// 레벨 이동 간 탄약 로드
+	if (UMyGameInstance* gi = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		currentAmmo = gi->currentAmmo;
+		if (playerMagUIInstance != nullptr)
+		{
+			playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+		}
 	}
 }
 
@@ -197,9 +215,17 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 		eic->BindAction(iaFire, ETriggerEvent::Started, this, &APlayerPawn::StartFire);
 		eic->BindAction(iaFire, ETriggerEvent::Completed, this, &APlayerPawn::EndFire);
 		
-		eic->BindAction(iaChangeWeapon, ETriggerEvent::Started,this, &APlayerPawn::ChangeWeapon);
+		//eic->BindAction(iaChangeWeapon, ETriggerEvent::Started,this, &APlayerPawn::ChangeWeapon);
+		
+		
 		
 		eic->BindAction(iaDash, ETriggerEvent::Triggered, this, &APlayerPawn::Dash);
+		
+		// 스킬 입력 바인딩
+		if (iaUseSkill_Q != nullptr)
+		{
+			eic->BindAction(iaUseSkill_Q, ETriggerEvent::Started, this, &APlayerPawn::UseSkill);
+		}
 	}
 }
 
@@ -270,10 +296,10 @@ void APlayerPawn::Fire()
 	}
 
 	// 2. 연사 모드(fireMode 2)일 때만 탄약 체크
-	if (fireMode == 2 && currentAmmo <= 0)
+	/*if (fireMode == 2 && currentAmmo <= 0)
 	{
 		return;
-	}
+	}*/
 
 	// 3. 탄환 생성 위치 및 회전 계산
 	FVector spawnLocation = firePosition->GetComponentLocation();
@@ -315,12 +341,20 @@ void APlayerPawn::Fire()
 	// 7. 연사 모드(fireMode 2)일 때만 탄약 소모 및 UI 업데이트
 	if (fireMode == 2)
 	{
-		currentAmmo--;
+		//currentAmmo--;
 		if (playerMagUIInstance != nullptr)
 		{
 			playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
 		}
+
+		// GameInstance에 저장
+		if (UMyGameInstance* gi = Cast<UMyGameInstance>(GetGameInstance()))
+		{
+			gi->currentAmmo = currentAmmo;
+		}
 	}
+	
+	
 }
 
 
@@ -381,6 +415,7 @@ void APlayerPawn::DashFinished()
 }
 
 ///플레이어 무기 교체 구현
+/*
 void APlayerPawn::ChangeWeapon(const struct FInputActionValue& value)
 {
 	float getValue = value.Get<float>();
@@ -397,6 +432,7 @@ void APlayerPawn::ChangeWeapon(const struct FInputActionValue& value)
 		playerMagUIInstance->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
+*/
 
 ///플레이어 피해받을때 처리하는 기능
 float APlayerPawn::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
@@ -469,5 +505,100 @@ void APlayerPawn::LootAmmo(int32 ammoAmount)
 {
 	currentAmmo = FMath::Min(currentAmmo + ammoAmount, maxAmmo);
 	
-	playerMagUIInstance->UpdataAmmo(currentAmmo,maxAmmo);
+	if (playerMagUIInstance != nullptr)
+	{
+		playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+	}
+
+	// GameInstance에 저장
+	if (UMyGameInstance* gi = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		gi->currentAmmo = currentAmmo;
+	}
+}
+
+void APlayerPawn::UseSkill()
+{
+	// 탄약이 최대치일 때만 스킬 사용 가능
+	if (currentAmmo < maxAmmo)
+	{
+		return;
+	}
+
+	// 탄약 소모 및 UI 업데이트
+	currentAmmo = 0;
+	if (playerMagUIInstance != nullptr)
+	{
+		playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
+	}
+
+	// GameInstance에 저장
+	if (UMyGameInstance* gi = Cast<UMyGameInstance>(GetGameInstance()))
+	{
+		gi->currentAmmo = currentAmmo;
+	}
+
+	// 스킬 웨이브 초기화 및 실행
+	skillWaveCount = 0;
+	ExecuteSkillWave();
+}
+
+void APlayerPawn::ExecuteSkillWave()
+{
+	skillWaveCount++;
+
+	if (skillWaveCount == 1)
+	{
+		// 1단계: 3발 발사
+		SpawnFanBullets(3, 30.0f);
+		
+		// 다음 발사 전 딜레이 (0.3초)
+		GetWorld()->GetTimerManager().SetTimer(skillTimerHandle, this, &APlayerPawn::ExecuteSkillWave, 0.3f, false);
+	}
+	else if (skillWaveCount == 2)
+	{
+		// 2단계: 4발 발사
+		SpawnFanBullets(4, 45.0f);
+		
+		// 마지막 5발 발사 전 가장 큰 딜레이 (0.8초)
+		GetWorld()->GetTimerManager().SetTimer(skillTimerHandle, this, &APlayerPawn::ExecuteSkillWave, 0.8f, false);
+	}
+	else if (skillWaveCount == 3)
+	{
+		// 3단계: 5발 발사
+		SpawnFanBullets(5, 60.0f);
+		
+		// 스킬 종료 (타이머 클리어는 선택 사항, 여기서는 단발성 타이머이므로 자동 종료됨)
+	}
+}
+
+void APlayerPawn::SpawnFanBullets(int32 bulletCount, float spreadAngle)
+{
+	if (bulletCount <= 0 || !bulletFactories.IsValidIndex(0) || bulletFactories[0] == nullptr)
+	{
+		return;
+	}
+
+	FVector spawnLocation = firePosition->GetComponentLocation();
+	FRotator baseRotation = firePosition->GetComponentRotation();
+
+	// 부채꼴 계산
+	// 예: 3발, 30도 -> -15도, 0도, +15도 순으로 발사
+	float startAngle = -spreadAngle / 2.0f;
+	float angleStep = (bulletCount > 1) ? (spreadAngle / (bulletCount - 1)) : 0.0f;
+
+	for (int32 i = 0; i < bulletCount; i++)
+	{
+		float currentAngle = startAngle + (angleStep * i);
+		FRotator spawnRotation = baseRotation;
+		spawnRotation.Yaw += currentAngle;
+
+		GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactories[0], spawnLocation, spawnRotation);
+	}
+
+	// 발사 효과음 (기존 사운드가 있다면 재생)
+	if (fireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, fireSound, GetActorLocation());
+	}
 }

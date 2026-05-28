@@ -9,8 +9,7 @@
 
 ## 📺 시연 영상
 
-[!\[Dice Shooter Demo](https://img.youtube.com/vi/\_1KbW\_1ESfU/0.jpg)](https://youtu.be/_1KbW_1ESfU)
-
+[![Dice Shooter Demo](https://img.youtube.com/vi/_1KbW_1ESfU/0.jpg)](https://youtu.be/_1KbW_1ESfU)
 > 이미지를 클릭하면 유튜브 영상으로 이동합니다.
 
 \---

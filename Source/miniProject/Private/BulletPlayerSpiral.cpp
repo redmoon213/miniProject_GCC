@@ -62,7 +62,7 @@ void ABulletPlayerSpiral::OnOverlap(UPrimitiveComponent* OverlappedComponent, AA
 		UGameplayStatics::ApplyDamage(OtherActor, 1.0f, nullptr, this, nullptr);
 		
 		// 적에게 맞았을 때는 소멸합니다. (관통을 원하시면 이 줄을 주석 처리 하세요)
-		Destroy();
+		//Destroy();
 	}
 }
 

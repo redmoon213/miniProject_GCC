@@ -139,5 +139,9 @@ public:
 	
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> debrisClass;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> debrisClassBlue;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> debrisClassPurple;
 	void Die();
 };

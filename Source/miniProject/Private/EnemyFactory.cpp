@@ -74,15 +74,9 @@ bool AEnemyFactory::GetValidSpawnLocation(FVector& outLocation)
 		// ProjectPointToNavigation이 true를 반환하면 유효한 내비메쉬 지점을 찾은 것입니다.
 		outLocation = navLocation.Location;
 
-		// 수정 전 코드
-		// 성공한 지점에 초록색 구체 표시 (디버그용)
-		// DrawDebugSphere(GetWorld(), outLocation, 30.0f, 12, FColor::Green, false, 3.0f);
 		return true;
 		}
-
-		// 수정 전 코드
-		// 실패한 지점에 빨간색 점 표시 (디버그용)
-		// DrawDebugPoint(GetWorld(), targetPoint, 10.0f, FColor::Red, false, 1.0f);
+		
 		}	outLocation = playerLocation + FVector(minSpawnDistance, 0.0f, 0.0f);
 	return true;
 }
@@ -92,7 +86,8 @@ void AEnemyFactory::SpawnStart(int32 enemyCount)
 {
 	enemiesSpawnLeft = enemyCount;
 	
-	GetWorld()->GetTimerManager().SetTimer(enemiesSpawnTimerHandle, this, &AEnemyFactory::SpawnSingleEnemy, spawnTimer, true);
+	GetWorld()->GetTimerManager().SetTimer(enemiesSpawnTimerHandle, this, 
+		&AEnemyFactory::SpawnSingleEnemy, spawnTimer, true);
 }
 
 

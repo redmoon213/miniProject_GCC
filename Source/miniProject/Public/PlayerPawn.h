@@ -95,6 +95,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USoundBase* fireSound;
 	
+	UPROPERTY(EditAnywhere)
+	class USoundBase* fireSoundBasic;
+	
+	/*UPROPERTY(EditAnywhere)
+	class USoundBase* fireSound;
+	*/
+	
+	
 	int32 currentAmmo = 0;
 	int32 maxAmmo = 30;
 

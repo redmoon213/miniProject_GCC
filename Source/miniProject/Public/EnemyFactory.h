@@ -51,6 +51,7 @@ public:
 	
 	void SpawnEnemyBoss();
 	
+	UPROPERTY(EditAnywhere)
 	float spawnTimer = 2.0f;
 	
 private:

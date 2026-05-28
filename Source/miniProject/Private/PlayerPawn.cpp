@@ -418,7 +418,13 @@ void APlayerPawn::Fire()
 			gi->currentAmmo = currentAmmo;
 		}
 	}
+	
+	if (fireSoundBasic)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, fireSoundBasic, GetActorLocation());
+	}
 }
+
 
 
 

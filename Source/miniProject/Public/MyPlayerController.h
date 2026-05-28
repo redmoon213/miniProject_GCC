@@ -40,6 +40,14 @@ public:
 	// 사운드 중지를 위해 오디오 컴포넌트를 저장할 변수입니다.
 	UPROPERTY()
 	class UAudioComponent* bossSpawnWarningAudioComp;
+
+	// 보스 배경음악 에셋 변수입니다.
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	class USoundBase* bossBGM;
+
+	// 보스 배경음악 오디오 컴포넌트 변수입니다.
+	UPROPERTY()
+	class UAudioComponent* bgmAudioComp;
 	
 	void ShowRestartUI();
 

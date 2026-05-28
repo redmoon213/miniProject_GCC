@@ -90,6 +90,7 @@ void AEnemy::BeginPlay()
 	case 1:
 		meshComp->SetMaterial(0, materialRed);
 		baseMaterial = materialRed;
+		moveSpeed = 600.0f;
 		break;
 	case 2:
 		meshComp->SetMaterial(0, materialBlue);
@@ -414,9 +415,18 @@ void AEnemy::OnOverlapToPlayer(UPrimitiveComponent* OverlappedComponent, AActor*
 void AEnemy::Die()
 {
 	float dropRate = FMath::Rand();
-	
-	GetWorld()->SpawnActor<AActor>(debrisClass, GetActorLocation(), GetActorRotation());
-	
+	if (attackMode == 1)
+	{
+		GetWorld()->SpawnActor<AActor>(debrisClass, GetActorLocation(), GetActorRotation());
+	}
+	if (attackMode == 2)
+	{
+		GetWorld()->SpawnActor<AActor>(debrisClassBlue, GetActorLocation(), GetActorRotation());
+	}
+	if (attackMode == 3)
+	{
+		GetWorld()->SpawnActor<AActor>(debrisClassPurple, GetActorLocation(), GetActorRotation());
+	}
 	GetWorld()->SpawnActor<ADroppedAmmo>(droppedAmmoClass, GetActorLocation(), GetActorRotation());
 	AMyGameModeBase* gameMode = Cast<AMyGameModeBase>(GetWorld()->GetAuthGameMode());
 	

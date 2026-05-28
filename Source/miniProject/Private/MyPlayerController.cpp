@@ -37,6 +37,13 @@ void AMyPlayerController::HideBossSpawnWarning()
 	{
 		bossSpawnWarningAudioComp->Stop();
 	}
+
+	// 보스 배경음악을 재생합니다.
+	if (bossBGM && !bgmAudioComp)
+	{
+		// 2D 사운드로 재생하여 화면 전체에 들리게 합니다.
+		bgmAudioComp = UGameplayStatics::SpawnSound2D(this, bossBGM);
+	}
 }
 
 void AMyPlayerController::ShowRestartUI()
@@ -55,6 +62,8 @@ void AMyPlayerController::ShowRestartUI()
 		
 		SetInputMode(inputMode);
 		bShowMouseCursor = true;
+		// 게임 전체를 일시정지 상태로 만듭니다.
+		SetPause(true);
 	}
 }
 

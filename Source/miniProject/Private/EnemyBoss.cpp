@@ -467,8 +467,11 @@ float AEnemyBoss::TakeDamage(float DamageAmount, struct FDamageEvent const& Dama
 		if (pc)
 		{
 			pc->HideBossHPBar();
+			
+			
 		}
 		Destroy();
+		pc->ShowRestartUI();
 	}
 	
 	return DamageAmount;
@@ -601,5 +604,6 @@ void AEnemyBoss::EndPattern()
 	bCanRotate = true;
 	
 	// 3. 결정된 지연 시간 후 다음 패턴 실행
-	GetWorldTimerManager().SetTimer(bossPatternHandle, this, &AEnemyBoss::ChoosePattern, nextDelay, false);
+	GetWorldTimerManager().SetTimer(bossPatternHandle, this, &AEnemyBoss::ChoosePattern, 
+		nextDelay, false);
 }

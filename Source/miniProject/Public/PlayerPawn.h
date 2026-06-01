@@ -77,6 +77,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UArrowComponent* firePosition;
 	
+	// 오브젝트 풀링을 위한 풀 매니저
+	UPROPERTY(EditAnywhere)
+	class UBulletPoolManager* bulletPoolManager;
+	
 	// 무기별 탄환 블루프린트 배열
 	UPROPERTY(EditAnywhere, Category = "Weapon")
 	TArray<TSubclassOf<class ABulletPlayerBasic>> bulletFactories;

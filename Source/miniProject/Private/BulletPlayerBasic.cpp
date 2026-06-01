@@ -3,6 +3,7 @@
 
 #include "BulletPlayerBasic.h"
 
+#include "BulletPoolManager.h"
 #include "Enemy.h"
 #include "EnemyBoss.h"
 #include "PlayerPawn.h"
@@ -70,7 +71,9 @@ void ABulletPlayerBasic::OnBulletOverlap(UPrimitiveComponent* OverlappedComponen
 	// 벽 태그를 가진 액터와 충돌했는지 확인합니다.
 	if (OtherActor && OtherActor->ActorHasTag(TEXT("Wall")))
 	{
-		Destroy();
+		//Destroy();
+		DeactivateBullet();
+		poolManager->ReturnToPool(this);
 		return;
 	}
 
@@ -84,5 +87,26 @@ void ABulletPlayerBasic::OnBulletOverlap(UPrimitiveComponent* OverlappedComponen
 	}
 	
 	UGameplayStatics::ApplyDamage(OtherActor, 1.0f, nullptr, this, nullptr);
-	Destroy();
+	//Destroy();
+	DeactivateBullet();
+	poolManager->ReturnToPool(this);
+}
+
+void ABulletPlayerBasic::ActivateBullet()
+{
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+	SetActorTickEnabled(true);
+}
+
+void ABulletPlayerBasic::DeactivateBullet()
+{
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	SetActorTickEnabled(false);
+}
+
+void ABulletPlayerBasic::SetOwnerPool(class UBulletPoolManager* targetPool)
+{
+	poolManager = targetPool;
 }

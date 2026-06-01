@@ -31,8 +31,13 @@ public:
 	UPROPERTY(EditAnywhere)
 	float moveSpeed = 500.f;
 	
+	class UBulletPoolManager* poolManager;
 	
 	UFUNCTION()
 	void OnBulletOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	void ActivateBullet();
+	void DeactivateBullet();
+	void SetOwnerPool(class UBulletPoolManager* targetPool);
 };

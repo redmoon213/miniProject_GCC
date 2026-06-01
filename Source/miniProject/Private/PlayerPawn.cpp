@@ -5,6 +5,7 @@
 
 #include "BulletPlayerBasic.h"
 #include "BulletPlayerSpiral.h"
+#include "BulletPoolManager.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "MyPlayerController.h"
@@ -69,6 +70,9 @@ APlayerPawn::APlayerPawn()
 	//대시 기능에 관련된 변수 초기화
 	dashTimelineComp = CreateDefaultSubobject<UTimelineComponent>(TEXT("My DashTimeline Component"));
 	
+	// 총알오브젝트풀링을 위한 매니저
+	bulletPoolManager = CreateDefaultSubobject<UBulletPoolManager>(TEXT("Bullet Pool Manager"));
+	//bulletPoolManager->SetupAttachment(boxComp);  <<- 얘는 필요없대
 	
 }	
 
@@ -77,46 +81,6 @@ void APlayerPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 수정 전 코드
-	/*
-	playerCursorInstance = CreateWidget<UPlayerCursor>(GetWorld(), playerCursorClass);
-	
-	//플레이어 체력바 UI
-	playerHealthUIInstance =  CreateWidget<UPlayerHealthUI>(GetWorld(), playerHealthUIClass);
-	if (playerHealthUIInstance != nullptr)
-	{
-		playerHealthUIInstance->AddToViewport();
-		playerHealthUIInstance->UpdateHealthIcon(playerHp);
-	}
-	
-	//플레이어 탄창 UI
-	playerMagUIInstance = CreateWidget<UPlayerMagUI>(GetWorld(), playerMagUIClass);
-	if (playerMagUIInstance != nullptr)
-	{
-		playerMagUIInstance->AddToViewport();
-		playerMagUIInstance->SetVisibility(ESlateVisibility::Collapsed);
-		playerMagUIInstance->UpdataAmmo(currentAmmo, maxAmmo);
-	}
-	
-	APlayerController* pc = GetWorld()->GetFirstPlayerController();
-	if (pc != nullptr)
-	{
-		pc->bShowMouseCursor = true;  // 화면에 마우스 커서가 보이도록 함
-		pc->SetMouseCursorWidget(EMouseCursor::Default, playerCursorInstance);
-		
-		// 입력 모드를 게임과 UI 모두 가능하도록 설정 (재시작 시 조작 불능 해결)
-		FInputModeGameAndUI inputMode;
-		inputMode.SetHideCursorDuringCapture(false);
-		pc->SetInputMode(inputMode);
-		
-		UEnhancedInputLocalPlayerSubsystem* subsys =
-			ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(pc->GetLocalPlayer());
-		if (subsys != nullptr)
-		{
-			subsys->AddMappingContext(imcPlayerInput, 0);
-		}
-	}
-	*/
 
 	// 현재 레벨 이름을 확인합니다.
 	FString currentLevelName = UGameplayStatics::GetCurrentLevelName(GetWorld());
@@ -390,14 +354,20 @@ void APlayerPawn::Fire()
 	// 4. 현재 누적된 탄퍼짐(currentSpread)을 좌우(Yaw) 방향으로 적용
 	float randomYaw = FMath::RandRange(-currentSpread, currentSpread);
 	spawnRotation.Yaw += randomYaw;
-
+	FTransform bulletTransform(spawnRotation, spawnLocation);
 	int32 factoryIndex = fireMode - 1;
 	if (bulletFactories.IsValidIndex(factoryIndex) && bulletFactories[factoryIndex] != nullptr)
-	{
+	{/*
 		ABulletPlayerBasic* bulletPlayer = GetWorld()->SpawnActor<ABulletPlayerBasic>(
 			bulletFactories[factoryIndex],
 			spawnLocation,
-			spawnRotation);
+			spawnRotation);*/
+		ABulletPlayerBasic* spawnBullet = bulletPoolManager->GetBullet(bulletTransform);
+		if (!spawnBullet)
+		{
+			// 만약 제대로 안들어와있다면 처리할 부분
+			UE_LOG(LogTemp,Warning, TEXT("Fail to spawn Bullet"));
+		}
 	}
 
 	// 6. 탄퍼짐 누적: 발사 후 탄퍼짐 값을 증가시킵니다.
@@ -655,8 +625,9 @@ void APlayerPawn::SpawnFanBullets(int32 bulletCount, float spreadAngle)
 		float currentAngle = startAngle + (angleStep * i);
 		FRotator spawnRotation = baseRotation;
 		spawnRotation.Yaw += currentAngle;
-
-		GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactories[0], spawnLocation, spawnRotation);
+		FTransform bulletTransform(spawnRotation, spawnLocation);
+		bulletPoolManager->GetBullet(bulletTransform);
+		//GetWorld()->SpawnActor<ABulletPlayerBasic>(bulletFactories[0], spawnLocation, spawnRotation);
 	}
 
 	// 발사 효과음 (기존 사운드가 있다면 재생)

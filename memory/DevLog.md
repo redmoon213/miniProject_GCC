@@ -51,4 +51,31 @@
     - 적이 생성될 때 플레이어의 현재 `Z`값(높이)을 참조하여 스폰 위치를 동기화함으로써 매몰 문제 해결.
 
 ---
+
+## 📅 2026년 6월 1일 (월)
+
+### 1. 탄환 오브젝트 풀링(Object Pooling) 시스템 구현
+- **UBulletPoolManager 개발**: 탄환을 매번 생성/파괴하는 대신 미리 생성해둔 풀(Pool)에서 꺼내 쓰고 반환하는 관리 컴포넌트 구현.
+- **메모리 최적화**: 게임 시작 시 탄환을 미리 생성(`InitializeBulletPool`)하여 런타임 중 프레임 드랍(Spike) 현상 방지.
+- **탄환 클래스 연동**: `ABulletPlayerBasic`에 활성화(`ActivateBullet`) 및 비활성화(`DeactivateBullet`) 로직을 추가하여 풀링에 적합한 구조로 개선.
+
+### 2. 플레이어 사격 로직 고도화
+- **풀링 기반 사격**: 일반 사격(`Fire`) 및 Q 스킬(`SpawnFanBullets`) 모두에서 `SpawnActor` 대신 풀 매니저의 `GetBullet`을 사용하도록 변경.
+- **탄퍼짐(Spread) 시스템 통합**: 최종 계산된 탄퍼짐 값을 포함한 `FTransform`을 풀 매니저에 전달하여 정확한 위치와 회전으로 탄환이 활성화되도록 구현.
+
+---
+
+## 🛠 트러블슈팅 및 해결 과정
+
+### 1. 탄환 풀 초기화 실패 (Spawn 실패)
+- **문제**: 게임 실행 시 풀에 탄환이 채워지지 않고 `SpawnActor`가 실패함.
+- **원인**: `UBulletPoolManager`의 `bulletClass` 변수가 에디터에 노출되지 않아 블루프린트에서 할당되지 않았음.
+- **해결**: `bulletClass`를 `UPROPERTY(EditAnywhere)`로 선언하여 에디터 상세 패널에서 `BP_BulletPlayerBasic`을 직접 할당할 수 있도록 수정.
+
+### 2. Q 스킬(산탄) 사용 시 크래시 발생
+- **문제**: Q 스킬 발사 후 탄환이 충돌할 때 게임이 강제 종료됨.
+- **원인**: Q 스킬은 여전히 `SpawnActor`로 생성되고 있었으나, 탄환 내부 로직은 `poolManager->ReturnToPool`을 호출하려고 시도함. 새로 생성된 탄환은 매니저 참조가 없어(`nullptr`) Access Violation 발생.
+- **해결**: Q 스킬 발사 로직도 풀링 시스템(`GetBullet`)을 사용하도록 수정하여 모든 탄환이 매니저를 정상적으로 참조하도록 통일.
+
+---
 *다음 개발 시 이 로그 하단에 내용을 추가하여 진행 상황을 유지합니다.*

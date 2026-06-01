@@ -9,8 +9,7 @@
 
 ## 📺 시연 영상
 
-[!\[Dice Shooter Demo](https://img.youtube.com/vi/\_1KbW\_1ESfU/0.jpg)](https://youtu.be/_1KbW_1ESfU)
-
+[![Dice Shooter Demo](https://img.youtube.com/vi/_1KbW_1ESfU/0.jpg)](https://youtu.be/_1KbW_1ESfU)
 > 이미지를 클릭하면 유튜브 영상으로 이동합니다.
 
 \---
@@ -71,8 +70,7 @@
 
 * **GitHub Repository**: [https://github.com/redmoon213/miniProject\_GCC](https://github.com/redmoon213/miniProject_GCC)
 * **YouTube Demo**: [https://youtu.be/\_1KbW\_1ESfU](https://youtu.be/_1KbW_1ESfU)
-
-**프로젝트보고서** [https://docs.google.com/document/d/1rOj\_lDPiTS8UidbqpCIl4z-27c8oWP7\_yJ1Zetl03Ik/edit?usp=sharing](https://docs.google.com/document/d/1rOj_lDPiTS8UidbqpCIl4z-27c8oWP7_yJ1Zetl03Ik/edit?usp=sharing)
+* **프로젝트보고서** [https://docs.google.com/document/d/1rOj\_lDPiTS8UidbqpCIl4z-27c8oWP7\_yJ1Zetl03Ik/edit?usp=sharing](https://docs.google.com/document/d/1rOj_lDPiTS8UidbqpCIl4z-27c8oWP7_yJ1Zetl03Ik/edit?usp=sharing)
 
 \---
 

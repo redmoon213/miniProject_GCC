@@ -190,21 +190,7 @@ void AEnemyBoss::StartCrossCharge()
 	bCanRotate = false;
 	currentDoubleChargeCount = 0;
 	
-	//currentRadius += nextRadius;
-	//decalGroup->SetRelativeRotation(FRotator(0.0f, currentRadius, 0.0f));
-	
 	decalGroup->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-	
-	/*if (bChargeDirectionMode)
-	{
-	decalGroup->SetRelativeRotation(FRotator(0.0f, -45.0f, 0.0f));
-		bChargeDirectionMode = false;
-	}
-	else
-	{
-		decalGroup->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-		bChargeDirectionMode = true;
-	}*/
 	
 	if (decalNorth) decalNorth->SetHiddenInGame(false);
 	if (decalSouth) decalSouth->SetHiddenInGame(false);
@@ -266,8 +252,6 @@ void AEnemyBoss::ExecuteCrossCharge()
 			boxExtent.Y = (decalSize.Y * scale.Y) / 2.0f;
 			boxExtent.Z = (decalSize.Z * scale.Z) / 2.0f;
 			
-			TArray<AActor*> overlappedActors;
-			
 			// --- 전용 트레이스 채널(EnemyChargeAttack)을 이용한 판정 로직 ---
 			// 에디터에서 첫 번째로 추가한 트레이스 채널은 보통 ECC_GameTraceChannel1에 해당합니다.
 			TArray<TEnumAsByte<EObjectTypeQuery>> objectTypes;
@@ -283,24 +267,6 @@ void AEnemyBoss::ExecuteCrossCharge()
 				FCollisionShape::MakeBox(boxExtent)
 				);
 			
-
-			/*// 전용 채널 필터를 적용하여 정확한 오버랩 체크 수행
-			UKismetSystemLibrary::BoxOverlapActors(
-				GetWorld(),
-				overlapLocation,
-				boxExtent,
-				objectTypes,
-				nullptr,
-				ignoreActors,
-				overlappedActors
-			);*/
-			
-			
-			/*
-			for (AActor* actor : overlappedActors)
-			{
-				totalHitActors.AddUnique(actor);
-			}*/
 			for (const FOverlapResult& result : overlapResults)
 			{
 				AActor* hitActor = result.GetActor();
@@ -310,8 +276,6 @@ void AEnemyBoss::ExecuteCrossCharge()
 				}
 			}
 			
-			//DrawDebugBox(GetWorld(), overlapLocation, boxExtent, overlapRotation.Quaternion(), FColor::Red, false, 1.0f, 0, 5.0f);
-
 		}
 	}	
 
@@ -321,7 +285,8 @@ void AEnemyBoss::ExecuteCrossCharge()
 		if (hitActor && hitActor == player)
 		{
 			
-			UGameplayStatics::ApplyDamage(hitActor, 1.0f, nullptr, this, nullptr);
+			UGameplayStatics::ApplyDamage(hitActor, 1.0f, nullptr,
+				this, nullptr);
 			UE_LOG(LogTemp, Warning, TEXT("보스: 십자 공격 플레이어 적중!"));
 		}
 	}

@@ -28,10 +28,6 @@ void UEnemyIndicatorWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 		return;
 	}
 
-	// 수정 전 코드
-	// APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	// if (!PC) return;
-	
 	// 캐싱된 컨트롤러가 유효한지 확인합니다.
 	if (!cachedPC)
 	{
@@ -63,7 +59,7 @@ void UEnemyIndicatorWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
 	// 4. 화면 밖일 때 표시
 	
 	SetRenderOpacity(1.0f);
-	// 5. 방향 계산 (픽셀 - 픽셀 이므로 완벽하게 작동!)
+	// 5. 방향 계산, 투영된 위치에서 화면의 중앙좌표를 빼서 방향을 구함.
 	FVector2D dir = screenPos - screenCenter;
 	if (!bProjected) 
 	{
@@ -94,10 +90,10 @@ void UEnemyIndicatorWidget::NativeTick(const FGeometry& MyGeometry, float InDelt
     
 	
 	
-	// 엔진에게 "내가 픽셀 좌표 줄 테니까 알아서 화면에 배치해!" 라고 요청
+	// 최종 위치를 뷰포트에 배치시킴.
 	SetPositionInViewport(finalPos, true);
     
-	// ★ 보너스 핵심: 위젯의 중심점(Pivot)을 정중앙(0.5, 0.5)으로 맞춰야 테두리에 예쁘게 걸칩니다.
+	// 위젯의 피벗을 중앙(0.5, 0.5)에 맞춰 화면 가장자리에 제대로 걸쳐 보일 수 있게 함.
 	SetAlignmentInViewport(FVector2D(0.5f, 0.5f));
 }
 
